@@ -116,6 +116,416 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = '' }) 
     }
   }
 
+  const generateCompleteProject = () => {
+    if (!currentPage) return { html: '', css: '' }
+    
+    // Gerar HTML completo
+    let html = `<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${currentPage.name || 'Projeto Editor'}</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-container">
+`
+
+    // Adicionar elementos
+    currentPage.elements.forEach((element: any) => {
+      switch (element.type) {
+        case 'text':
+          html += `    <div class="element element-${element.id}" data-type="text">
+      ${element.content || 'Texto'}
+    </div>
+`
+          break
+          
+        case 'rectangle':
+          html += `    <div class="element element-${element.id}" data-type="rectangle"></div>
+`
+          break
+          
+        case 'line':
+          html += `    <div class="element element-${element.id}" data-type="line"></div>
+`
+          break
+          
+        case 'image':
+          html += `    <img class="element element-${element.id}" data-type="image" src="${element.src || ''}" alt="${element.alt || ''}" />
+`
+          break
+          
+        default:
+          html += `    <div class="element element-${element.id}" data-type="${element.type}">
+      <!-- Elemento customizado: ${element.type} -->
+    </div>
+`
+      }
+    })
+
+    html += `  </div>
+</body>
+</html>`
+
+    // Gerar CSS completo
+    let css = `/* Projeto gerado pelo Editor de Layouts */
+/* ${new Date().toLocaleDateString('pt-BR')} */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+
+.page-container {
+  position: relative;
+  width: ${currentPage.config?.width || 794}px;
+  height: ${currentPage.config?.height || 1123}px;
+  background: white;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.element {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+/* Estilos específicos por tipo */
+.element[data-type="text"] {
+  display: flex;
+  align-items: center;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.element[data-type="rectangle"] {
+  border: 1px solid #ddd;
+}
+
+.element[data-type="line"] {
+  border-bottom: 1px solid #000;
+  height: 1px !important;
+}
+
+.element[data-type="image"] {
+  object-fit: contain;
+}
+
+/* Estilos individuais dos elementos */
+`
+
+    // Adicionar estilos específicos de cada elemento
+    currentPage.elements.forEach((element: any) => {
+      css += generateElementCSS(element) + '\n'
+    })
+
+    return { html, css }
+  }
+
+  const generateCompleteReactProject = () => {
+    if (!currentPage) return ''
+    
+    let code = `import React from 'react'
+import './styles.css'
+
+interface ElementProps {
+  className?: string
+  style?: React.CSSProperties
+}
+
+const ${currentPage.name?.replace(/\s+/g, '') || 'Layout'}Component: React.FC = () => {
+  return (
+    <div className="page-container">
+`
+
+    // Adicionar elementos como componentes React
+    currentPage.elements.forEach((element: any) => {
+      const bounds = element.bounds || {}
+      const transform = element.transform || {}
+      
+      switch (element.type) {
+        case 'text':
+          code += `      <div 
+        className="element element-${element.id}" 
+        data-type="text"
+        style={{
+          left: '${bounds.x || 0}px',
+          top: '${bounds.y || 0}px',
+          width: '${bounds.width || 100}px',
+          height: '${bounds.height || 20}px',
+          ${transform.rotation ? `transform: 'rotate(${transform.rotation}deg)',` : ''}
+          ${transform.opacity !== undefined && transform.opacity !== 1 ? `opacity: ${transform.opacity},` : ''}
+        }}
+      >
+        ${element.content || 'Texto'}
+      </div>
+`
+          break
+          
+        case 'rectangle':
+          code += `      <div 
+        className="element element-${element.id}" 
+        data-type="rectangle"
+        style={{
+          left: '${bounds.x || 0}px',
+          top: '${bounds.y || 0}px',
+          width: '${bounds.width || 100}px',
+          height: '${bounds.height || 100}px',
+          ${transform.rotation ? `transform: 'rotate(${transform.rotation}deg)',` : ''}
+          ${transform.opacity !== undefined && transform.opacity !== 1 ? `opacity: ${transform.opacity},` : ''}
+        }}
+      />
+`
+          break
+          
+        case 'line':
+          code += `      <div 
+        className="element element-${element.id}" 
+        data-type="line"
+        style={{
+          left: '${bounds.x || 0}px',
+          top: '${bounds.y || 0}px',
+          width: '${bounds.width || 100}px',
+          height: '1px',
+          ${transform.rotation ? `transform: 'rotate(${transform.rotation}deg)',` : ''}
+          ${transform.opacity !== undefined && transform.opacity !== 1 ? `opacity: ${transform.opacity},` : ''}
+        }}
+      />
+`
+          break
+          
+        case 'image':
+          code += `      <img 
+        className="element element-${element.id}" 
+        data-type="image"
+        src="${element.src || ''}"
+        alt="${element.alt || ''}"
+        style={{
+          left: '${bounds.x || 0}px',
+          top: '${bounds.y || 0}px',
+          width: '${bounds.width || 100}px',
+          height: '${bounds.height || 100}px',
+          ${transform.rotation ? `transform: 'rotate(${transform.rotation}deg)',` : ''}
+          ${transform.opacity !== undefined && transform.opacity !== 1 ? `opacity: ${transform.opacity},` : ''}
+        }}
+      />
+`
+          break
+          
+        default:
+          code += `      <div 
+        className="element element-${element.id}" 
+        data-type="${element.type}"
+        style={{
+          left: '${bounds.x || 0}px',
+          top: '${bounds.y || 0}px',
+          width: '${bounds.width || 100}px',
+          height: '${bounds.height || 100}px',
+          ${transform.rotation ? `transform: 'rotate(${transform.rotation}deg)',` : ''}
+          ${transform.opacity !== undefined && transform.opacity !== 1 ? `opacity: ${transform.opacity},` : ''}
+        }}
+      >
+        {/* Elemento customizado: ${element.type} */}
+      </div>
+`
+      }
+    })
+
+    code += `    </div>
+  )
+}
+
+export default ${currentPage.name?.replace(/\s+/g, '') || 'Layout'}Component`
+
+    return code
+  }
+
+  const generateCompleteJsPDFProject = () => {
+    if (!currentPage) return ''
+    
+    let code = `import jsPDF from 'jspdf'
+
+// Função para gerar PDF do layout: ${currentPage.name || 'Layout'}
+export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = () => {
+  const doc = new jsPDF()
+  
+  // Configurar página
+  const pageWidth = ${currentPage.config?.width || 794} // pixels
+  const pageHeight = ${currentPage.config?.height || 1123} // pixels
+  
+  // Converter pixels para mm (assumindo 96 DPI)
+  const pxToMm = (px: number) => px * 0.264583
+  const pageWidthMm = pxToMm(pageWidth)
+  const pageHeightMm = pxToMm(pageHeight)
+  
+  // Configurar formato da página
+  doc.internal.pageSize.setWidth(pageWidthMm)
+  doc.internal.pageSize.setHeight(pageHeightMm)
+  
+  // Adicionar elementos
+`
+
+    // Adicionar cada elemento
+    currentPage.elements.forEach((element: any, index: number) => {
+      const bounds = element.bounds || {}
+      const transform = element.transform || {}
+      
+      code += `
+  // Elemento ${index + 1}: ${element.type} - ${element.name || 'Sem nome'}
+  {
+    const x = pxToMm(${bounds.x || 0})
+    const y = pxToMm(${bounds.y || 0})
+    const width = pxToMm(${bounds.width || 100})
+    const height = pxToMm(${bounds.height || 20})
+    
+`
+
+      switch (element.type) {
+        case 'text':
+          code += `    // Configurar texto
+    doc.setFont('${element.fontFamily || 'helvetica'}', '${element.fontWeight || 'normal'}')
+    doc.setFontSize(${element.fontSize || 14})
+    ${element.color ? `
+    const color = '${element.color}'.replace('#', '')
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    doc.setTextColor(r, g, b)` : 'doc.setTextColor(0, 0, 0)'}
+    
+    // Adicionar texto
+    doc.text('${(element.content || 'Texto').replace(/'/g, "\\'")}', x, y + height/2)
+`
+          break
+          
+        case 'rectangle':
+          code += `    // Configurar retângulo
+    ${element.fill ? `
+    const fillColor = '${element.fill}'.replace('#', '')
+    const fillR = parseInt(fillColor.substr(0, 2), 16)
+    const fillG = parseInt(fillColor.substr(2, 2), 16)
+    const fillB = parseInt(fillColor.substr(4, 2), 16)
+    doc.setFillColor(fillR, fillG, fillB)` : ''}
+    ${element.stroke ? `
+    const strokeColor = '${element.stroke}'.replace('#', '')
+    const strokeR = parseInt(strokeColor.substr(0, 2), 16)
+    const strokeG = parseInt(strokeColor.substr(2, 2), 16)
+    const strokeB = parseInt(strokeColor.substr(4, 2), 16)
+    doc.setDrawColor(strokeR, strokeG, strokeB)` : ''}
+    ${element.strokeWidth ? `doc.setLineWidth(${element.strokeWidth})` : ''}
+    
+    // Adicionar retângulo
+    doc.rect(x, y, width, height, '${element.fill ? (element.strokeWidth ? 'FD' : 'F') : (element.strokeWidth ? 'S' : 'S')}')
+`
+          break
+          
+        case 'line':
+          code += `    // Configurar linha
+    ${element.stroke ? `
+    const lineColor = '${element.stroke}'.replace('#', '')
+    const lineR = parseInt(lineColor.substr(0, 2), 16)
+    const lineG = parseInt(lineColor.substr(2, 2), 16)
+    const lineB = parseInt(lineColor.substr(4, 2), 16)
+    doc.setDrawColor(lineR, lineG, lineB)` : 'doc.setDrawColor(0, 0, 0)'}
+    ${element.strokeWidth ? `doc.setLineWidth(${element.strokeWidth})` : 'doc.setLineWidth(1)'}
+    
+    // Adicionar linha
+    doc.line(x, y, x + width, y)
+`
+          break
+          
+        case 'image':
+          code += `    // Configurar imagem
+    // Nota: A imagem deve estar em base64 ou ser carregada previamente
+    const imageData = '${element.src || 'data:image/png;base64,...'}' // base64 da imagem
+    
+    try {
+      // Adicionar imagem
+      doc.addImage(imageData, 'PNG', x, y, width, height)
+    } catch (error) {
+      console.warn('Erro ao adicionar imagem:', error)
+      // Desenhar placeholder
+      doc.setDrawColor(200, 200, 200)
+      doc.rect(x, y, width, height, 'S')
+      doc.setFontSize(8)
+      doc.setTextColor(150, 150, 150)
+      doc.text('Imagem', x + width/2, y + height/2, { align: 'center' })
+    }
+`
+          break
+          
+        default:
+          code += `    // Elemento customizado: ${element.type}
+    // Implemente conforme necessário
+    doc.setDrawColor(100, 100, 100)
+    doc.rect(x, y, width, height, 'S')
+`
+      }
+      
+      if (transform.rotation) {
+        code += `
+    // Aplicar rotação
+    // doc.saveGraphicsState()
+    // doc.rotateRadians(${transform.rotation} * Math.PI / 180, x + width/2, y + height/2)
+    // ... reaplicar elemento com rotação ...
+    // doc.restoreGraphicsState()
+`
+      }
+      
+      code += `  }
+`
+    })
+
+    code += `
+  // Salvar PDF
+  doc.save('${currentPage.name?.replace(/\s+/g, '-') || 'layout'}.pdf')
+  
+  return doc
+}
+
+// Exemplo de uso:
+// generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF()
+`
+
+    return code
+  }
+
+  const downloadCompleteProject = () => {
+    const { html, css } = generateCompleteProject()
+    
+    // Criar um ZIP com os arquivos (simulado com múltiplos downloads)
+    // Download HTML
+    const htmlBlob = new Blob([html], { type: 'text/html' })
+    const htmlUrl = URL.createObjectURL(htmlBlob)
+    const htmlLink = document.createElement('a')
+    htmlLink.href = htmlUrl
+    htmlLink.download = 'index.html'
+    htmlLink.click()
+    URL.revokeObjectURL(htmlUrl)
+    
+    // Download CSS (com pequeno delay)
+    setTimeout(() => {
+      const cssBlob = new Blob([css], { type: 'text/css' })
+      const cssUrl = URL.createObjectURL(cssBlob)
+      const cssLink = document.createElement('a')
+      cssLink.href = cssUrl
+      cssLink.download = 'styles.css'
+      cssLink.click()
+      URL.revokeObjectURL(cssUrl)
+    }, 100)
+    
+    setNotification({ type: 'success', message: 'Projeto completo baixado (HTML + CSS)!' })
+    setTimeout(() => setNotification(null), 3000)
+  }
+
   const generateElementCSS = (element: any) => {
     const bounds = element.bounds || {}
     const transform = element.transform || {}
@@ -715,10 +1125,91 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = '' }) 
             Propriedades
           </h6>
         </div>
-        <div className="flex-grow-1 d-flex align-items-center justify-content-center">
-          <div className="text-center text-muted">
+        <div className="flex-grow-1 p-4">
+          <div className="text-center text-muted mb-4">
             <i className="bi bi-mouse2 fs-1 mb-3 d-block"></i>
             <p className="mb-0">Selecione um elemento para editar suas propriedades</p>
+          </div>
+          
+          {/* Downloads do Projeto - sempre disponível */}
+          <div className="mt-4">
+            <h6 className="text-muted mb-3 fw-bold">
+              <i className="bi bi-download me-2"></i>
+              Projeto Completo
+            </h6>
+            <div className="d-grid gap-2">
+              <button 
+                className="btn btn-success"
+                onClick={downloadCompleteProject}
+                title="Baixar projeto completo com HTML e CSS"
+                disabled={!currentPage || !currentPage.elements || currentPage.elements.length === 0}
+              >
+                <i className="bi bi-file-earmark-zip me-2"></i> 
+                HTML + CSS
+              </button>
+              <button 
+                className="btn btn-info"
+                onClick={() => {
+                  const reactCode = generateCompleteReactProject()
+                  const cssCode = generateCompleteProject().css
+                  
+                  // Download React component
+                  const reactBlob = new Blob([reactCode], { type: 'text/typescript' })
+                  const reactUrl = URL.createObjectURL(reactBlob)
+                  const reactLink = document.createElement('a')
+                  reactLink.href = reactUrl
+                  reactLink.download = `${currentPage?.name?.replace(/\s+/g, '') || 'Layout'}Component.tsx`
+                  reactLink.click()
+                  URL.revokeObjectURL(reactUrl)
+                  
+                  // Download CSS (com delay)
+                  setTimeout(() => {
+                    const cssBlob = new Blob([cssCode], { type: 'text/css' })
+                    const cssUrl = URL.createObjectURL(cssBlob)
+                    const cssLink = document.createElement('a')
+                    cssLink.href = cssUrl
+                    cssLink.download = 'styles.css'
+                    cssLink.click()
+                    URL.revokeObjectURL(cssUrl)
+                  }, 100)
+                  
+                  setNotification({ type: 'success', message: 'Projeto React baixado (TSX + CSS)!' })
+                  setTimeout(() => setNotification(null), 3000)
+                }}
+                title="Baixar como componente React/TSX com CSS"
+                disabled={!currentPage || !currentPage.elements || currentPage.elements.length === 0}
+              >
+                <i className="bi bi-file-earmark-code me-2"></i> 
+                React/TSX + CSS
+              </button>
+              <button 
+                className="btn btn-danger"
+                onClick={() => {
+                  const jsPDFCode = generateCompleteJsPDFProject()
+                  const blob = new Blob([jsPDFCode], { type: 'text/typescript' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `generate-${currentPage?.name?.replace(/\s+/g, '-') || 'layout'}-pdf.ts`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  setNotification({ type: 'success', message: 'Gerador jsPDF baixado!' })
+                  setTimeout(() => setNotification(null), 3000)
+                }}
+                title="Baixar gerador de PDF completo com jsPDF"
+                disabled={!currentPage || !currentPage.elements || currentPage.elements.length === 0}
+              >
+                <i className="bi bi-file-earmark-pdf me-2"></i> 
+                jsPDF Generator
+              </button>
+              <small className="text-muted">
+                <i className="bi bi-info-circle me-1"></i>
+                {!currentPage || !currentPage.elements || currentPage.elements.length === 0 
+                  ? 'Adicione elementos à página para baixar o projeto'
+                  : `Baixar todos os ${currentPage.elements.length} elementos em diferentes formatos`
+                }
+              </small>
+            </div>
           </div>
         </div>
       </div>
@@ -882,13 +1373,95 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = '' }) 
             </div>
           </div>
 
-          {/* CSS Avançado */}
+          {/* Downloads do Projeto */}
+          <div className="mb-4">
+            <h6 className="text-muted mb-3 fw-bold">
+              <i className="bi bi-download me-2"></i>
+              Downloads do Projeto
+            </h6>
+            <div className="d-grid gap-2 mb-3">
+              <button 
+                className="btn btn-success btn-sm"
+                onClick={downloadCompleteProject}
+                title="Baixar projeto completo com HTML e CSS"
+              >
+                <i className="bi bi-file-earmark-zip me-1"></i> 
+                HTML + CSS
+              </button>
+              <button 
+                className="btn btn-info btn-sm"
+                onClick={() => {
+                  const reactCode = generateCompleteReactProject()
+                  const cssCode = generateCompleteProject().css
+                  
+                  // Download React component
+                  const reactBlob = new Blob([reactCode], { type: 'text/typescript' })
+                  const reactUrl = URL.createObjectURL(reactBlob)
+                  const reactLink = document.createElement('a')
+                  reactLink.href = reactUrl
+                  reactLink.download = `${currentPage?.name?.replace(/\s+/g, '') || 'Layout'}Component.tsx`
+                  reactLink.click()
+                  URL.revokeObjectURL(reactUrl)
+                  
+                  // Download CSS (com delay)
+                  setTimeout(() => {
+                    const cssBlob = new Blob([cssCode], { type: 'text/css' })
+                    const cssUrl = URL.createObjectURL(cssBlob)
+                    const cssLink = document.createElement('a')
+                    cssLink.href = cssUrl
+                    cssLink.download = 'styles.css'
+                    cssLink.click()
+                    URL.revokeObjectURL(cssUrl)
+                  }, 100)
+                  
+                  setNotification({ type: 'success', message: 'Projeto React baixado (TSX + CSS)!' })
+                  setTimeout(() => setNotification(null), 3000)
+                }}
+                title="Baixar como componente React/TSX com CSS"
+              >
+                <i className="bi bi-file-earmark-code me-1"></i> 
+                React/TSX + CSS
+              </button>
+              <button 
+                className="btn btn-danger btn-sm"
+                onClick={() => {
+                  const jsPDFCode = generateCompleteJsPDFProject()
+                  const blob = new Blob([jsPDFCode], { type: 'text/typescript' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `generate-${currentPage?.name?.replace(/\s+/g, '-') || 'layout'}-pdf.ts`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  setNotification({ type: 'success', message: 'Gerador jsPDF baixado!' })
+                  setTimeout(() => setNotification(null), 3000)
+                }}
+                title="Baixar gerador de PDF completo com jsPDF"
+              >
+                <i className="bi bi-file-earmark-pdf me-1"></i> 
+                jsPDF Generator
+              </button>
+            </div>
+            <small className="text-muted">
+              <i className="bi bi-info-circle me-1"></i>
+              Baixa todos os elementos da página como um projeto completo
+            </small>
+          </div>
+
+          {/* Código de Elementos */}
           <div className="mb-4">
             <h6 className="text-muted mb-3 fw-bold">
               <i className="bi bi-code-slash me-2"></i>
-              CSS Avançado
+              Código do Elemento
             </h6>
             <div className="d-flex gap-1 flex-wrap">
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={downloadCompleteProject}
+                title="Baixar projeto completo (HTML + CSS)"
+              >
+                <i className="bi bi-download me-1"></i> Projeto HTML
+              </button>
               <button 
                 className="btn btn-outline-info btn-sm"
                 onClick={() => {
@@ -958,7 +1531,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = '' }) 
                   setNotification({ type: 'success', message: 'CSS baixado como arquivo!' })
                   setTimeout(() => setNotification(null), 2000)
                 }}
-                title="Baixar CSS"
+                title="Baixar CSS do elemento"
               >
                 <i className="bi bi-download"></i>
               </button>
