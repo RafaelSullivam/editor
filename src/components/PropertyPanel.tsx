@@ -142,7 +142,26 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = '' }) 
   }
 
   const generateCompleteProject = () => {
-    if (!currentPage) return { html: '', css: '' }
+    console.log('=== GENERATING PROJECT DEBUG ===')
+    console.log('currentPage exists:', !!currentPage)
+    console.log('currentPage.elements exists:', !!currentPage?.elements)
+    console.log('elements count:', currentPage?.elements?.length || 0)
+    
+    if (!currentPage) {
+      console.error('ERROR: currentPage is null/undefined')
+      return { html: '<!-- ERROR: No current page -->', css: '/* ERROR: No current page */' }
+    }
+    
+    if (!currentPage.elements || currentPage.elements.length === 0) {
+      console.warn('WARNING: No elements in current page')
+      return { 
+        html: '<!-- WARNING: No elements in current page -->', 
+        css: '/* WARNING: No elements in current page */' 
+      }
+    }
+    
+    console.log('First element:', currentPage.elements[0])
+    console.log('=== END GENERATING PROJECT DEBUG ===')
     
     // Gerar HTML completo
     let html = `<!DOCTYPE html>
@@ -524,6 +543,15 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
   }
 
   const downloadCompleteProject = () => {
+    // DEBUG: Log para verificar estado atual
+    console.log('=== DEBUG DOWNLOAD ===')
+    console.log('currentPage:', currentPage)
+    console.log('elements count:', currentPage?.elements?.length || 0)
+    if (currentPage?.elements && currentPage.elements.length > 0) {
+      console.log('first element:', currentPage.elements[0])
+    }
+    console.log('=== END DEBUG ===')
+    
     const { html, css } = generateCompleteProject()
     
     // Criar um ZIP com os arquivos (simulado com múltiplos downloads)

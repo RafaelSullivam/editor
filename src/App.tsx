@@ -36,6 +36,7 @@ function App() {
   const {
     layout,
     currentPage,
+    digitalFormat,
     selectedElementIds,
     getSelectedElements,
     createNewLayout,
@@ -50,8 +51,20 @@ function App() {
     }
   }, [layout, createNewLayout])
 
-  const pageWidth = currentPage?.config?.width || PAGE_FORMATS.A4.width
-  const pageHeight = currentPage?.config?.height || PAGE_FORMATS.A4.height
+  // Use digital format dimensions if available, otherwise fallback to page config or A4
+  const isDigitalFormat = digitalFormat && digitalFormat.category !== 'Impressão'
+  const pageWidth = isDigitalFormat 
+    ? digitalFormat.width 
+    : (currentPage?.config?.width || PAGE_FORMATS.A4.width)
+  const pageHeight = isDigitalFormat 
+    ? digitalFormat.height 
+    : (currentPage?.config?.height || PAGE_FORMATS.A4.height)
+  const pageUnit = isDigitalFormat ? 'px' : (currentPage?.config?.unit || 'mm')
+
+  // Calculate canvas scale based on unit type
+  const canvasScale = pageUnit === 'px' ? zoom : zoom * 3.779527559 // mm to px conversion
+  const canvasWidth = pageWidth * (pageUnit === 'px' ? zoom : 3.779527559)
+  const canvasHeight = pageHeight * (pageUnit === 'px' ? zoom : 3.779527559)
 
   const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -367,11 +380,11 @@ function App() {
                     <div className="small">
                       <div className="d-flex justify-content-between mb-1">
                         <span className="text-muted">Largura:</span>
-                        <span>{pageWidth}mm</span>
+                        <span>{pageWidth}{pageUnit}</span>
                       </div>
                       <div className="d-flex justify-content-between mb-1">
                         <span className="text-muted">Altura:</span>
-                        <span>{pageHeight}mm</span>
+                        <span>{pageHeight}{pageUnit}</span>
                       </div>
                       <div className="d-flex justify-content-between mb-1">
                         <span className="text-muted">Elementos:</span>
@@ -412,7 +425,7 @@ function App() {
                             {currentPage.name}
                           </h6>
                           <small className="text-muted">
-                            {pageWidth}mm × {pageHeight}mm
+                            {pageWidth}{pageUnit} × {pageHeight}{pageUnit}
                           </small>
                         </div>
                       </div>
@@ -432,8 +445,8 @@ function App() {
                   <div 
                     className="position-relative" 
                     style={{ 
-                      width: `${pageWidth * 3.779527559}px`, 
-                      height: `${pageHeight * 3.779527559 + 64}px`,
+                      width: `${canvasWidth}px`, 
+                      height: `${canvasHeight + 64}px`,
                       paddingTop: '64px'
                     }}
                   >
@@ -452,7 +465,7 @@ function App() {
                       <CanvasOverlay
                         width={pageWidth}
                         height={pageHeight}
-                        scale={zoom}
+                        scale={canvasScale}
                       />
                     </div>
 
@@ -460,8 +473,8 @@ function App() {
                     {isGridVisible && (
                       <div className="position-absolute top-0 start-0" style={{ top: '64px', pointerEvents: 'none' }}>
                         <svg 
-                          width={pageWidth * 3.779527559} 
-                          height={pageHeight * 3.779527559}
+                          width={canvasWidth} 
+                          height={canvasHeight}
                           style={{ opacity: 0.2 }}
                         >
                           <defs>

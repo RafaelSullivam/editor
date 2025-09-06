@@ -3,11 +3,17 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
 import type { Layout, Page, Element, EditorState, HistoryState, Point } from '../types'
 import { TemplateProcessor } from '../utils/templateProcessor'
+import type { DigitalPageFormat, ResponsiveConfig } from '../types/digitalFormats'
+import { DIGITAL_PAGE_FORMATS, getFormatById } from '../types/digitalFormats'
 
 interface EditorStore extends EditorState {
   // Layout state
   layout: Layout | null
   currentPage: Page | null
+  
+  // Digital format state
+  digitalFormat: DigitalPageFormat | null
+  responsiveConfig: ResponsiveConfig | null
   
   // History state
   history: HistoryState[]
@@ -17,6 +23,13 @@ interface EditorStore extends EditorState {
   setLayout: (layout: Layout) => void
   createNewLayout: (name: string, pageFormat: { width: number; height: number }) => void
   updateLayout: (updates: Partial<Layout>) => void
+  
+  // Digital format actions
+  setDigitalFormat: (format: DigitalPageFormat) => void
+  setDigitalFormatById: (formatId: string) => void
+  updateResponsiveConfig: (config: Partial<ResponsiveConfig>) => void
+  getAvailableFormats: () => DigitalPageFormat[]
+  getCurrentFormatScale: (containerWidth: number, containerHeight: number) => number
   
   // Page actions
   setCurrentPage: (pageId: string) => void
@@ -93,6 +106,18 @@ export const useEditorStore = create<EditorStore>()(
     ...initialEditorState,
     layout: null,
     currentPage: null,
+    digitalFormat: DIGITAL_PAGE_FORMATS.find(f => f.id === 'print-a4-portrait') || DIGITAL_PAGE_FORMATS[0], // A4 Portrait por padrão
+    responsiveConfig: {
+      breakpoints: {
+        mobile: 768,
+        tablet: 1024,
+        desktop: 1200,
+      },
+      activeFormat: DIGITAL_PAGE_FORMATS.find(f => f.id === 'print-a4-portrait') || DIGITAL_PAGE_FORMATS[0],
+      previewFormats: [],
+      autoScale: true,
+      keepAspectRatio: true,
+    },
     history: [],
     historyIndex: -1,
 
@@ -162,6 +187,81 @@ export const useEditorStore = create<EditorStore>()(
       
       set({ layout: updatedLayout })
       get().pushHistory('Layout atualizado')
+    },
+
+    // Digital format actions
+    setDigitalFormat: (format) => {
+      set({ digitalFormat: format })
+      
+      // Atualizar a página atual com as novas dimensões
+      const { layout, currentPageId } = get()
+      if (layout && currentPageId) {
+        // Determinar unidade baseada na categoria do formato
+        const isDigitalFormat = format.category !== 'Impressão'
+        const unit = isDigitalFormat ? 'px' : 'mm'
+        const width = isDigitalFormat ? format.width : format.width / 3.779527559 // Convert px to mm for print
+        const height = isDigitalFormat ? format.height : format.height / 3.779527559
+        
+        const updatedPages = layout.pages.map(page => 
+          page.id === currentPageId 
+            ? {
+                ...page,
+                config: {
+                  ...page.config,
+                  width: Math.round(width * 100) / 100, // Round to 2 decimal places
+                  height: Math.round(height * 100) / 100,
+                  unit: unit as 'px' | 'mm',
+                  orientation: format.orientation,
+                  dpi: isDigitalFormat ? format.pixelDensity * 96 : 300, // 300 DPI for print
+                }
+              }
+            : page
+        )
+        
+        const updatedLayout = {
+          ...layout,
+          pages: updatedPages,
+          updatedAt: new Date().toISOString(),
+        }
+        
+        set({ 
+          layout: updatedLayout,
+          currentPage: updatedPages.find(p => p.id === currentPageId) || null
+        })
+        get().pushHistory(`Formato alterado para ${format.name}`)
+      }
+    },
+
+    setDigitalFormatById: (formatId) => {
+      const format = getFormatById(formatId)
+      if (format) {
+        get().setDigitalFormat(format)
+      }
+    },
+
+    updateResponsiveConfig: (config) => {
+      const { responsiveConfig } = get()
+      if (responsiveConfig) {
+        set({ 
+          responsiveConfig: { 
+            ...responsiveConfig, 
+            ...config 
+          } 
+        })
+      }
+    },
+
+    getAvailableFormats: () => {
+      return [...DIGITAL_PAGE_FORMATS]
+    },
+
+    getCurrentFormatScale: (containerWidth, containerHeight) => {
+      const { digitalFormat } = get()
+      if (!digitalFormat) return 1
+      
+      const scaleX = containerWidth / digitalFormat.width
+      const scaleY = containerHeight / digitalFormat.height
+      return Math.min(scaleX, scaleY, 1)
     },
 
     setCurrentPage: (pageId) => {
@@ -822,3 +922,8 @@ export const useEditorStore = create<EditorStore>()(
     },
   }))
 )
+
+// Disponibilizar store globalmente para debug
+if (typeof window !== 'undefined') {
+  ;(window as any).editorStore = useEditorStore
+}

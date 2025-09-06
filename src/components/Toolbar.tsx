@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useEditorStore } from '../store/editor'
+import { PageFormatDisplay } from './PageFormatDisplay'
+import { ResponsivePreview } from './ResponsivePreview'
 
 interface ToolbarProps {
   onDownload?: () => void
@@ -24,6 +26,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onOpenVariableBinding,
   onOpenDynamicPreview,
 }) => {
+  const [showResponsivePreview, setShowResponsivePreview] = useState(false)
+  
   const {
     tool,
     zoom,
@@ -154,6 +158,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 title="Snap aos Elementos"
               >
                 <i className="bi-bounding-box"></i>
+              </button>
+            </div>
+
+            {/* Separator */}
+            <div className="vr me-3"></div>
+
+            {/* Page Format Display */}
+            <div className="me-3">
+              <PageFormatDisplay />
+            </div>
+
+            {/* Responsive Preview Button */}
+            <div className="me-3">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-info"
+                onClick={() => setShowResponsivePreview(true)}
+                title="Preview Responsivo"
+              >
+                <i className="bi-phone-landscape me-1"></i>
+                Preview
               </button>
             </div>
           </div>
@@ -293,6 +318,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Responsive Preview Modal */}
+      {showResponsivePreview && (
+        <ResponsivePreview onClose={() => setShowResponsivePreview(false)} />
+      )}
     </div>
   )
 }

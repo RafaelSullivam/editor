@@ -49,10 +49,32 @@ export const defaultTemplates: Template[] = [
           height: 297,
           unit: 'mm' as const,
           orientation: 'portrait' as const,
-          dpi: 96,
-          margins: { top: 20, right: 20, bottom: 20, left: 20 },
+          dpi: 300,
         },
-        elements: [],
+        elements: [
+          {
+            id: uuidv4(),
+            type: 'text',
+            name: 'Título',
+            bounds: { x: 20, y: 20, width: 170, height: 15 },
+            locked: false,
+            visible: true,
+            zIndex: 1,
+            content: 'RELATÓRIO',
+            isDynamic: false,
+            fontSize: 24,
+            fontFamily: 'Arial',
+            fontWeight: 'bold',
+            fontStyle: 'normal',
+            color: '#000000',
+            textAlign: 'center',
+            verticalAlign: 'middle',
+            lineHeight: 1.2,
+            letterSpacing: 0,
+            textDecoration: 'none',
+            wordWrap: true
+          }
+        ],
         guides: [],
         snapSettings: {
           snapToGrid: false,
@@ -65,16 +87,16 @@ export const defaultTemplates: Template[] = [
     }
   },
   {
-    id: 'template-certificate-basic',
-    name: 'Certificado Básico',
-    description: 'Template simples para certificados',
-    category: 'certificate',
-    tags: ['certificado', 'básico'],
+    id: 'template-geocontrole-field-report',
+    name: 'Relatório de Campo Geocontrole',
+    description: 'Template completo para relatórios de ensaio de campo da Geocontrole',
+    category: 'business',
+    tags: ['geocontrole', 'relatório', 'campo', 'ensaio', 'laboratório'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     layout: {
       id: uuidv4(),
-      name: 'Certificado Básico',
+      name: 'Relatório de Campo Geocontrole',
       version: '1.0.0',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -82,16 +104,137 @@ export const defaultTemplates: Template[] = [
       dataSources: [],
       pages: [{
         id: uuidv4(),
-        name: 'Certificado',
+        name: 'Página 1',
         config: {
-          width: 297,
-          height: 210,
+          width: 210,
+          height: 297,
           unit: 'mm' as const,
-          orientation: 'landscape' as const,
-          dpi: 96,
-          margins: { top: 20, right: 20, bottom: 20, left: 20 },
+          orientation: 'portrait' as const,
+          dpi: 300,
         },
-        elements: [],
+        elements: [
+          {
+            id: uuidv4(),
+            type: 'text',
+            name: 'Título Principal',
+            bounds: { x: 20, y: 20, width: 170, height: 15 },
+            locked: false,
+            visible: true,
+            zIndex: 1,
+            content: 'RELATÓRIO DE ENSAIO DE CAMPO',
+            isDynamic: false,
+            fontSize: 18,
+            fontFamily: 'Arial',
+            fontWeight: 'bold',
+            fontStyle: 'normal',
+            color: '#000000',
+            textAlign: 'center',
+            verticalAlign: 'middle',
+            lineHeight: 1.2,
+            letterSpacing: 0,
+            textDecoration: 'none',
+            wordWrap: true
+          },
+          {
+            id: uuidv4(),
+            type: 'text',
+            name: 'Identificação do Projeto',
+            bounds: { x: 20, y: 45, width: 170, height: 30 },
+            locked: false,
+            visible: true,
+            zIndex: 1,
+            content: `Projeto: {{NomeProjeto}}
+Cliente: {{NomeCliente}}
+Local: {{LocalEnsaio}}
+Data: {{DataEnsaio}}`,
+            isDynamic: true,
+            fontSize: 10,
+            fontFamily: 'Arial',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            color: '#000000',
+            textAlign: 'left',
+            verticalAlign: 'top',
+            lineHeight: 1.4,
+            letterSpacing: 0,
+            textDecoration: 'none',
+            wordWrap: true
+          },
+          {
+            id: uuidv4(),
+            type: 'text',
+            name: 'Área de Conteúdo',
+            bounds: { x: 20, y: 85, width: 170, height: 120 },
+            locked: false,
+            visible: true,
+            zIndex: 1,
+            content: `DESCRIÇÃO DOS ENSAIOS REALIZADOS
+
+Tipo de Ensaio: {{TipoEnsaio}}
+Norma Aplicada: {{NormaAplicada}}
+Equipamentos Utilizados: {{Equipamentos}}
+
+RESULTADOS:
+
+{{ResultadosEnsaio}}
+
+CONCLUSÕES:
+
+{{Conclusoes}}`,
+            isDynamic: true,
+            fontSize: 10,
+            fontFamily: 'Arial',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            color: '#000000',
+            textAlign: 'left',
+            verticalAlign: 'top',
+            lineHeight: 1.5,
+            letterSpacing: 0,
+            textDecoration: 'none',
+            wordWrap: true
+          },
+          {
+            id: uuidv4(),
+            type: 'text',
+            name: 'Footer Geocontrole',
+            bounds: { x: 10, y: 230, width: 190, height: 50 },
+            locked: false,
+            visible: true,
+            zIndex: 1,
+            content: `┌─────────────────────────────────────────────────────────────────────┐
+│ Status do Ensaio: {{StatusEnsaio}}      │ Aprovado ☐ │ Observação:   │
+│                                          │ Reprovado ☐ │ {{Observacao}} │
+├──────────────────────────────────────────┼─────────────┼───────────────┤
+│ Execução: {{Executado}}                 │ Aprovação:  │ Fiscalização: │
+├──────────────────────────────────────────┼─────────────┴───────────────┤
+│ Código laboratório:    │ DATA EMISSÃO:     │ Pág: {{pagina}}/{{totalPaginas}} │
+└─────────────────────────────────────────────────────────────────────┘
+
+Este relatório de ensaio só pode ser copiado integralmente ou 
+parcialmente com autorização da Geocontrole
+
+Av.Canadá,Nº 159 - Jardim Canadá Nova Lima - Minas Gerais - Brasil
+CEP: 34007-654 Tel.: +55 31 3517-9011
+**Informações fornecidas pelo projeto e/ou cliente
+
+═══════════════════════════════════════════════════════════════════
+   www.geocontrole.com - e-mail: mail.br@geocontrole.com
+═══════════════════════════════════════════════════════════════════`,
+            isDynamic: true,
+            fontSize: 7,
+            fontFamily: 'Courier New',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            color: '#000000',
+            textAlign: 'left',
+            verticalAlign: 'top',
+            lineHeight: 1.1,
+            letterSpacing: 0,
+            textDecoration: 'none',
+            wordWrap: false
+          }
+        ],
         guides: [],
         snapSettings: {
           snapToGrid: false,
@@ -117,7 +260,11 @@ export const elementLibrary: ElementLibraryItem[] = [
       type: 'text',
       name: 'Título',
       bounds: { x: 0, y: 0, width: 100, height: 15 },
+      locked: false,
+      visible: true,
+      zIndex: 1,
       content: 'TÍTULO',
+      isDynamic: false,
       fontSize: 24,
       fontFamily: 'Arial',
       fontWeight: 'bold',
@@ -132,35 +279,45 @@ export const elementLibrary: ElementLibraryItem[] = [
     }
   },
   {
-    id: 'shape-rectangle',
-    name: 'Retângulo',
-    description: 'Retângulo básico',
-    category: 'shapes',
-    tags: ['retângulo', 'forma'],
+    id: 'footer-geocontrole',
+    name: 'Footer Geocontrole',
+    description: 'Rodapé completo da Geocontrole para relatórios de ensaio',
+    category: 'footers',
+    tags: ['footer', 'rodapé', 'geocontrole', 'relatório', 'ensaio'],
     element: {
-      type: 'rectangle',
-      name: 'Retângulo',
-      bounds: { x: 0, y: 0, width: 80, height: 30 },
-      fill: '#ffffff',
-      stroke: '#000000',
-      strokeWidth: 1
-    }
-  },
-  {
-    id: 'line-separator',
-    name: 'Linha',
-    description: 'Linha separadora',
-    category: 'decorative',
-    tags: ['linha', 'separador'],
-    element: {
-      type: 'line',
-      name: 'Linha',
-      bounds: { x: 0, y: 0, width: 100, height: 1 },
-      startPoint: { x: 0, y: 0 },
-      endPoint: { x: 100, y: 0 },
-      stroke: '#000000',
-      strokeWidth: 1,
-      strokeStyle: 'solid'
+      type: 'text',
+      name: 'Footer Geocontrole',
+      bounds: { x: 10, y: 250, width: 190, height: 40 },
+      locked: false,
+      visible: true,
+      zIndex: 1,
+      content: `Status do Ensaio: {{StatusEnsaio}}
+      
+Aprovado | Reprovado
+
+Observação: {{Observacao}}
+
+Execução: {{Executado}} | Aprovação: | Fiscalização:
+
+Código laboratório: | DATA EMISSÃO: | Pág: {{pagina}}/{{totalPaginas}}
+
+Este relatório de ensaio só pode ser copiado integralmente ou parcialmente com autorização da Geocontrole
+Av.Canadá,Nº 159 - Jardim Canadá Nova Lima - Minas Gerais - Brasil - CEP: 34007-654 Tel.: +55 31 3517-9011
+**Informações fornecidas pelo projeto e/ou cliente
+
+www.geocontrole.com - e-mail: mail.br@geocontrole.com`,
+      isDynamic: true,
+      fontSize: 8,
+      fontFamily: 'Arial',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+      color: '#000000',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      lineHeight: 1.1,
+      letterSpacing: 0,
+      textDecoration: 'none',
+      wordWrap: true
     }
   }
 ]
@@ -171,7 +328,7 @@ export const getTemplatesByCategory = (category?: string): Template[] => {
   return defaultTemplates.filter(template => template.category === category)
 }
 
-// Função para buscar elementos da biblioteca por categoria
+// Função para buscar elementos por categoria
 export const getElementsByCategory = (category?: string): ElementLibraryItem[] => {
   if (!category) return elementLibrary
   return elementLibrary.filter(item => item.category === category)
@@ -182,11 +339,10 @@ export const createLayoutFromTemplate = (templateId: string): Layout | null => {
   const template = defaultTemplates.find(t => t.id === templateId)
   if (!template) return null
 
-  // Clonar o layout e gerar novos IDs
+  // Clone do layout com novos IDs
   const newLayout: Layout = {
     ...template.layout,
     id: uuidv4(),
-    name: `${template.layout.name} - Cópia`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     pages: template.layout.pages.map(page => ({
