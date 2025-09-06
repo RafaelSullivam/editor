@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
 import type { Layout, Page, Element, EditorState, HistoryState, Point } from '../types'
+import { TemplateProcessor } from '../utils/templateProcessor'
 
 interface EditorStore extends EditorState {
   // Layout state
@@ -49,6 +50,11 @@ interface EditorStore extends EditorState {
   toggleSnapToGrid: () => void
   toggleSnapToElements: () => void
   
+  // Alignment actions
+  alignElements: (type: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void
+  distributeElements: (type: 'horizontal' | 'vertical') => void
+  alignToPage: (type: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void
+  
   // History actions
   pushHistory: (description: string, data?: any) => void
   undo: () => void
@@ -62,6 +68,12 @@ interface EditorStore extends EditorState {
   exportLayout: () => Layout | null
   downloadProject: () => void
   loadFromFile: (file: File) => Promise<void>
+  
+  // Data processing actions
+  templateProcessor: TemplateProcessor
+  processElementContent: (element: Element) => Element
+  setDataIndex: (index: number) => void
+  getTotalDataRecords: () => number
 }
 
 const initialEditorState: EditorState = {
@@ -102,6 +114,7 @@ export const useEditorStore = create<EditorStore>()(
         version: '1.0.0',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        dataSources: [],
         pages: [{
           id: pageId,
           name: 'Página 1',
@@ -113,6 +126,15 @@ export const useEditorStore = create<EditorStore>()(
             dpi: 300,
           },
           elements: [],
+          guides: [],
+          snapSettings: {
+            snapToGrid: false,
+            snapToElements: true,
+            snapToGuides: true,
+            snapThreshold: 5,
+            showSnapLines: true
+          },
+          backgroundPdf: undefined,
         }],
         metadata: {},
       }
@@ -172,6 +194,15 @@ export const useEditorStore = create<EditorStore>()(
           dpi: 300,
         },
         elements: [],
+        guides: [],
+        snapSettings: {
+          snapToGrid: false,
+          snapToElements: true,
+          snapToGuides: true,
+          snapThreshold: 5,
+          showSnapLines: true
+        },
+        backgroundPdf: undefined,
         ...pageData,
       }
       
@@ -580,6 +611,211 @@ export const useEditorStore = create<EditorStore>()(
         console.error('Erro ao carregar arquivo:', error)
         throw new Error('Arquivo inválido ou corrompido')
       }
+    },
+
+    // Alignment functions
+    alignElements: (type) => {
+      const { selectedElementIds, currentPage } = get()
+      if (!currentPage || selectedElementIds.length < 2) return
+
+      const selectedElements = currentPage.elements.filter(e => 
+        selectedElementIds.includes(e.id)
+      )
+
+      if (selectedElements.length < 2) return
+
+      // Calcular bounds de referência (primeiro elemento selecionado)
+      const referenceElement = selectedElements[0]
+      const referenceBounds = referenceElement.bounds
+
+      const updatedElements = selectedElements.map(element => {
+        if (element.id === referenceElement.id) return element
+
+        const newBounds = { ...element.bounds }
+
+        switch (type) {
+          case 'left':
+            newBounds.x = referenceBounds.x
+            break
+          case 'center':
+            newBounds.x = referenceBounds.x + (referenceBounds.width / 2) - (newBounds.width / 2)
+            break
+          case 'right':
+            newBounds.x = referenceBounds.x + referenceBounds.width - newBounds.width
+            break
+          case 'top':
+            newBounds.y = referenceBounds.y
+            break
+          case 'middle':
+            newBounds.y = referenceBounds.y + (referenceBounds.height / 2) - (newBounds.height / 2)
+            break
+          case 'bottom':
+            newBounds.y = referenceBounds.y + referenceBounds.height - newBounds.height
+            break
+        }
+
+        return { ...element, bounds: newBounds }
+      })
+
+      // Atualizar elementos na página
+      const updatedPage = {
+        ...currentPage,
+        elements: currentPage.elements.map(element => {
+          const updatedElement = updatedElements.find(e => e.id === element.id)
+          return updatedElement || element
+        })
+      }
+
+      get().updatePage(currentPage.id, updatedPage)
+      get().pushHistory(`Elementos alinhados: ${type}`)
+    },
+
+    distributeElements: (type) => {
+      const { selectedElementIds, currentPage } = get()
+      if (!currentPage || selectedElementIds.length < 3) return
+
+      const selectedElements = currentPage.elements
+        .filter(e => selectedElementIds.includes(e.id))
+        .sort((a, b) => {
+          if (type === 'horizontal') {
+            return a.bounds.x - b.bounds.x
+          } else {
+            return a.bounds.y - b.bounds.y
+          }
+        })
+
+      if (selectedElements.length < 3) return
+
+      const firstElement = selectedElements[0]
+      const lastElement = selectedElements[selectedElements.length - 1]
+
+      let totalSpace: number
+      let availableSpace: number
+
+      if (type === 'horizontal') {
+        totalSpace = (lastElement.bounds.x + lastElement.bounds.width) - firstElement.bounds.x
+        const totalElementWidth = selectedElements.reduce((sum, el) => sum + el.bounds.width, 0)
+        availableSpace = totalSpace - totalElementWidth
+      } else {
+        totalSpace = (lastElement.bounds.y + lastElement.bounds.height) - firstElement.bounds.y
+        const totalElementHeight = selectedElements.reduce((sum, el) => sum + el.bounds.height, 0)
+        availableSpace = totalSpace - totalElementHeight
+      }
+
+      const spacing = availableSpace / (selectedElements.length - 1)
+
+      const updatedElements = selectedElements.map((element, index) => {
+        if (index === 0 || index === selectedElements.length - 1) {
+          return element // Não mover o primeiro e último elementos
+        }
+
+        const newBounds = { ...element.bounds }
+        
+        if (type === 'horizontal') {
+          let newX = firstElement.bounds.x + firstElement.bounds.width
+          for (let i = 1; i < index; i++) {
+            newX += spacing + selectedElements[i].bounds.width
+          }
+          newX += spacing
+          newBounds.x = newX
+        } else {
+          let newY = firstElement.bounds.y + firstElement.bounds.height
+          for (let i = 1; i < index; i++) {
+            newY += spacing + selectedElements[i].bounds.height
+          }
+          newY += spacing
+          newBounds.y = newY
+        }
+
+        return { ...element, bounds: newBounds }
+      })
+
+      // Atualizar elementos na página
+      const updatedPage = {
+        ...currentPage,
+        elements: currentPage.elements.map(element => {
+          const updatedElement = updatedElements.find(e => e.id === element.id)
+          return updatedElement || element
+        })
+      }
+
+      get().updatePage(currentPage.id, updatedPage)
+      get().pushHistory(`Elementos distribuídos: ${type}`)
+    },
+
+    alignToPage: (type) => {
+      const { selectedElementIds, currentPage } = get()
+      if (!currentPage || selectedElementIds.length === 0) return
+
+      const selectedElements = currentPage.elements.filter(e => 
+        selectedElementIds.includes(e.id)
+      )
+
+      const pageConfig = currentPage.config
+      const pageWidth = pageConfig.width
+      const pageHeight = pageConfig.height
+
+      const updatedElements = selectedElements.map(element => {
+        const newBounds = { ...element.bounds }
+
+        switch (type) {
+          case 'left':
+            newBounds.x = 0
+            break
+          case 'center':
+            newBounds.x = (pageWidth / 2) - (newBounds.width / 2)
+            break
+          case 'right':
+            newBounds.x = pageWidth - newBounds.width
+            break
+          case 'top':
+            newBounds.y = 0
+            break
+          case 'middle':
+            newBounds.y = (pageHeight / 2) - (newBounds.height / 2)
+            break
+          case 'bottom':
+            newBounds.y = pageHeight - newBounds.height
+            break
+        }
+
+        return { ...element, bounds: newBounds }
+      })
+
+      // Atualizar elementos na página
+      const updatedPage = {
+        ...currentPage,
+        elements: currentPage.elements.map(element => {
+          const updatedElement = updatedElements.find(e => e.id === element.id)
+          return updatedElement || element
+        })
+      }
+
+      get().updatePage(currentPage.id, updatedPage)
+      get().pushHistory(`Elementos alinhados à página: ${type}`)
+    },
+
+    // Template processor and data methods
+    templateProcessor: new TemplateProcessor([]),
+
+    processElementContent: (element: Element) => {
+      const { layout, templateProcessor } = get()
+      if (!layout) return element
+      
+      // Atualizar as fontes de dados do processador
+      templateProcessor.updateDataSources(layout.dataSources || [])
+      
+      return templateProcessor.processElement(element)
+    },
+
+    setDataIndex: (index: number) => {
+      const { templateProcessor } = get()
+      templateProcessor.setDataIndex(index)
+    },
+
+    getTotalDataRecords: () => {
+      const { templateProcessor } = get()
+      return templateProcessor.getTotalDataRecords()
     },
   }))
 )

@@ -6,6 +6,11 @@ interface ToolbarProps {
   onLoadFromFile?: () => void
   onExport?: () => void
   onImport?: () => void
+  onOpenTemplates?: () => void
+  onOpenAdvancedDesign?: () => void
+  onOpenDataManager?: () => void
+  onOpenVariableBinding?: () => void
+  onOpenDynamicPreview?: () => void
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -13,6 +18,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onLoadFromFile,
   onExport,
   onImport,
+  onOpenTemplates,
+  onOpenAdvancedDesign,
+  onOpenDataManager,
+  onOpenVariableBinding,
+  onOpenDynamicPreview,
 }) => {
   const {
     tool,
@@ -175,6 +185,63 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               >
                 <i className="bi-zoom-in"></i>
               </button>
+            </div>
+
+            {/* Separator */}
+            <div className="vr me-3"></div>
+
+            {/* Template Library */}
+            <div className="btn-group" role="group">
+              {onOpenTemplates && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={onOpenTemplates}
+                  title="Biblioteca de Templates"
+                >
+                  <i className="bi-collection"></i>
+                </button>
+              )}
+              {onOpenAdvancedDesign && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={onOpenAdvancedDesign}
+                  title="Design Avançado"
+                >
+                  <i className="bi-palette"></i>
+                </button>
+              )}
+              {onOpenDataManager && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-info"
+                  onClick={onOpenDataManager}
+                  title="Gerenciar Dados"
+                >
+                  <i className="bi-database"></i>
+                </button>
+              )}
+              {onOpenVariableBinding && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-warning"
+                  onClick={onOpenVariableBinding}
+                  title="Vincular Dados"
+                >
+                  <i className="bi-link-45deg"></i>
+                </button>
+              )}
+              {onOpenDynamicPreview && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-success"
+                  onClick={onOpenDynamicPreview}
+                  title="Preview Dinâmico"
+                >
+                  <i className="bi-eye"></i>
+                </button>
+              )}
             </div>
 
             {/* Separator */}

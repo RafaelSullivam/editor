@@ -6,6 +6,12 @@ import CanvasOverlay from './components/CanvasOverlay'
 import Toolbar from './components/Toolbar'
 import PropertyPanel from './components/PropertyPanel'
 import PDFPreview from './components/PDFPreview'
+import { TemplateManager } from './components/TemplateManager'
+import { AdvancedDesignPanel } from './components/AdvancedDesignPanel'
+import { DataManager } from './components/DataManager'
+import { VariableBinding } from './components/VariableBinding'
+import { DynamicPreview } from './components/DynamicPreview'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { PAGE_FORMATS } from './types'
 
 function App() {
@@ -14,14 +20,24 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(true)
   const [showPropertyPanel, setShowPropertyPanel] = useState(true)
   const [showPDFPreview, setShowPDFPreview] = useState(false)
+  const [showTemplateManager, setShowTemplateManager] = useState(false)
+  const [showAdvancedDesign, setShowAdvancedDesign] = useState(false)
+  const [showDataManager, setShowDataManager] = useState(false)
+  const [showVariableBinding, setShowVariableBinding] = useState(false)
+  const [showDynamicPreview, setShowDynamicPreview] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [isGridVisible, setIsGridVisible] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const projectFileInputRef = useRef<HTMLInputElement>(null)
 
+  // Ativar atalhos de teclado
+  useKeyboardShortcuts()
+
   const {
     layout,
     currentPage,
+    selectedElementIds,
+    getSelectedElements,
     createNewLayout,
     downloadProject,
     loadFromFile
@@ -54,6 +70,26 @@ function App() {
 
   const handleDownloadProject = () => {
     downloadProject()
+  }
+
+  const handleOpenTemplates = () => {
+    setShowTemplateManager(true)
+  }
+
+  const handleOpenAdvancedDesign = () => {
+    setShowAdvancedDesign(true)
+  }
+
+  const handleOpenDataManager = () => {
+    setShowDataManager(true)
+  }
+
+  const handleOpenVariableBinding = () => {
+    setShowVariableBinding(true)
+  }
+
+  const handleOpenDynamicPreview = () => {
+    setShowDynamicPreview(true)
   }
 
   const handleLoadFromFile = () => {
@@ -254,6 +290,11 @@ function App() {
         <Toolbar 
           onDownload={handleDownloadProject}
           onLoadFromFile={handleLoadFromFile}
+          onOpenTemplates={handleOpenTemplates}
+          onOpenAdvancedDesign={handleOpenAdvancedDesign}
+          onOpenDataManager={handleOpenDataManager}
+          onOpenVariableBinding={handleOpenVariableBinding}
+          onOpenDynamicPreview={handleOpenDynamicPreview}
         />
 
         {/* Main Content Area */}
@@ -531,6 +572,31 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showTemplateManager && (
+        <TemplateManager onClose={() => setShowTemplateManager(false)} />
+      )}
+
+      {showAdvancedDesign && (
+        <AdvancedDesignPanel onClose={() => setShowAdvancedDesign(false)} />
+      )}
+
+      {showDataManager && (
+        <DataManager onClose={() => setShowDataManager(false)} />
+      )}
+
+      {showVariableBinding && selectedElementIds.length > 0 && (
+        <VariableBinding 
+          element={getSelectedElements()[0]} 
+          onClose={() => setShowVariableBinding(false)} 
+        />
+      )}
+
+      {showDynamicPreview && (
+        <DynamicPreview 
+          onClose={() => setShowDynamicPreview(false)} 
+        />
       )}
     </div>
   )
