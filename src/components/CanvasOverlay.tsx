@@ -37,6 +37,8 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
     selectElement,
     deselectAll,
     addElement,
+    deleteElement,
+    duplicateElement,
   } = useEditorStore()
 
   const elements = currentPage?.elements || []
@@ -48,6 +50,7 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
   // Handle mouse down for dragging and creating elements
   const handleMouseDown = (event: React.MouseEvent, elementId?: string) => {
     event.preventDefault()
+    console.log('Mouse down on canvas, tool:', tool, 'elementId:', elementId)
     
     if (elementId) {
       if (onElementClick) {
@@ -64,11 +67,14 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           },
           elementId,
         })
+        console.log('Selecionando elemento:', elementId)
         selectElement(elementId, event.ctrlKey || event.metaKey)
       }
     } else {
       // Clicked on canvas - create new element based on selected tool
+      console.log('Clicked on canvas, current tool:', tool)
       if (tool !== 'select') {
+        console.log('Creating new element with tool:', tool)
         const rect = canvasRef.current!.getBoundingClientRect()
         const clickPos = {
           x: event.clientX - rect.left,
@@ -84,6 +90,8 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
         const finalY = isSnapToGrid ? snapToGrid(yMm, gridSize) : yMm
         
         createElementAtPosition(finalX, finalY)
+      } else {
+        console.log('Select tool active, not creating element')
       }
       
       if (onCanvasClick) {
@@ -97,6 +105,13 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
 
   // Create element at specific position based on current tool
   const createElementAtPosition = (x: number, y: number) => {
+    console.log('Creating element at position:', x, y, 'with tool:', tool)
+    
+    if (!currentPage) {
+      console.error('No current page available to add elements')
+      return
+    }
+    
     const defaultWidth = 50
     const defaultHeight = 30
     
@@ -194,28 +209,14 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
             fontSize: 12,
             fontWeight: 'bold',
             color: '#000000',
-            textAlign: 'center',
-            verticalAlign: 'middle',
-            padding: 4,
+            height: 30,
           },
-          rowStyle: {
-            backgroundColor: '#ffffff',
-            fontSize: 12,
-            fontWeight: 'normal',
-            color: '#000000',
-            textAlign: 'left',
-            verticalAlign: 'middle',
-            padding: 4,
-          },
-          showHeaders: true,
-          alternateRowColors: false,
-          dataSource: 'static',
-          data: [],
-          border: {
-            width: 1,
-            color: '#000000',
-            style: 'solid',
-          },
+          showHeader: true,
+          showBorders: true,
+          borderColor: '#000000',
+          borderWidth: 1,
+          pageBreak: false,
+          repeatHeader: true,
         }
         break
         
@@ -313,6 +314,32 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
     }
   }, [dragState, scale, isSnapToGrid, snapToElements, elements, updateElement, gridSize])
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle if canvas area is focused and there are selected elements
+      if (selectedElementIds.length === 0) return
+      
+      switch (event.key) {
+        case 'Delete':
+        case 'Backspace':
+          event.preventDefault()
+          selectedElementIds.forEach(id => deleteElement(id))
+          break
+        case 'd':
+        case 'D':
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault()
+            selectedElementIds.forEach(id => duplicateElement(id))
+          }
+          break
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [selectedElementIds, deleteElement, duplicateElement])
+
   // Render element based on type
   const renderElement = (element: Element) => {
     const isSelected = selectedElementIds.includes(element.id)
@@ -361,7 +388,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
               padding: '2px',
               overflow: 'hidden',
             }}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              handleMouseDown(e, element.id)
+            }}
           >
             {textElement.content || 'Texto'}
           </div>
@@ -373,7 +403,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           <div
             key={element.id}
             style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              handleMouseDown(e, element.id)
+            }}
           >
             {imageElement.src ? (
               <img
@@ -406,7 +439,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
               borderStyle: 'solid',
               borderRadius: `${(rectElement.border?.radius || 0) * scale}px`,
             }}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              handleMouseDown(e, element.id)
+            }}
           />
         )
 
@@ -415,7 +451,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           <div
             key={element.id}
             style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              handleMouseDown(e, element.id)
+            }}
           >
             <div className="w-full h-full bg-white border flex items-center justify-center text-sm">
               QR Code
@@ -428,7 +467,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           <div
             key={element.id}
             style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              handleMouseDown(e, element.id)
+            }}
           >
             <div className="w-full h-full bg-white border border-gray-300 text-xs p-1">
               Tabela
@@ -441,7 +483,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           <div
             key={element.id}
             style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+              handleMouseDown(e, element.id)
+            }}
           >
             <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs">
               {element.type}
@@ -455,7 +500,10 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
     <div
       ref={canvasRef}
       className="absolute inset-0 overflow-hidden"
-      style={{ width: width * scale, height: height * scale }}
+      style={{ 
+        width: convertUnits(width, 'mm', 'px', 96) * scale, 
+        height: convertUnits(height, 'mm', 'px', 96) * scale 
+      }}
       onMouseDown={(e) => handleMouseDown(e)}
     >
       {/* Grid */}

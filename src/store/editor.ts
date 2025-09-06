@@ -282,7 +282,9 @@ export const useEditorStore = create<EditorStore>()(
     },
 
     addElement: (element) => {
+      console.log('Store addElement chamado:', element.id, element.type)
       const { layout, currentPageId } = get()
+      console.log('addElement - Layout existe:', !!layout, 'CurrentPageId:', currentPageId)
       if (!layout || !currentPageId) return
       
       const updatedPages = layout.pages.map(page =>
@@ -290,6 +292,9 @@ export const useEditorStore = create<EditorStore>()(
           ? { ...page, elements: [...page.elements, element] }
           : page
       )
+      
+      const currentPageAfterUpdate = updatedPages.find(p => p.id === currentPageId)
+      console.log('Elementos após adicionar:', currentPageAfterUpdate?.elements.length)
       
       const updatedLayout = {
         ...layout,
@@ -299,7 +304,7 @@ export const useEditorStore = create<EditorStore>()(
       
       set({ 
         layout: updatedLayout,
-        currentPage: updatedPages.find(p => p.id === currentPageId),
+        currentPage: currentPageAfterUpdate,
         selectedElementIds: [element.id],
       })
       get().pushHistory('Elemento adicionado')
@@ -335,8 +340,14 @@ export const useEditorStore = create<EditorStore>()(
     },
 
     deleteElement: (elementId) => {
+      console.log('Store deleteElement chamado com ID:', elementId)
       const { layout, currentPageId, selectedElementIds } = get()
+      console.log('Layout existe:', !!layout, 'CurrentPageId:', currentPageId)
       if (!layout || !currentPageId) return
+      
+      const currentPageElements = layout.pages.find(p => p.id === currentPageId)?.elements || []
+      console.log('Elementos na página atual:', currentPageElements.length)
+      console.log('Elemento a ser deletado existe:', currentPageElements.some(e => e.id === elementId))
       
       const updatedPages = layout.pages.map(page =>
         page.id === currentPageId
@@ -352,6 +363,8 @@ export const useEditorStore = create<EditorStore>()(
         pages: updatedPages,
         updatedAt: new Date().toISOString(),
       }
+      
+      console.log('Elementos após filtrar:', updatedPages.find(p => p.id === currentPageId)?.elements.length)
       
       set({ 
         layout: updatedLayout,

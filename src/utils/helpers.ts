@@ -40,6 +40,10 @@ export const snapToGrid = (value: number, gridSize: number): number => {
 }
 
 export const snapToValue = (value: number, targets: number[], threshold = 5): number => {
+  if (!targets || targets.length === 0) {
+    return value
+  }
+  
   const closest = targets.reduce((prev, curr) =>
     Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
   )

@@ -1,23 +1,33 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import { useEditorStore } from './store/editor'
 import PDFViewer from './components/PDFViewer'
 import CanvasOverlay from './components/CanvasOverlay'
 import Toolbar from './components/Toolbar'
+import PropertyPanel from './components/PropertyPanel'
 import { PAGE_FORMATS } from './types'
 
 function App() {
   const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [showSidebar, setShowSidebar] = useState(true)
   const [showWelcome, setShowWelcome] = useState(true)
+  const [showPropertyPanel, setShowPropertyPanel] = useState(true)
   const [zoom, setZoom] = useState(1)
   const [isGridVisible, setIsGridVisible] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
+    layout,
     currentPage,
     createNewLayout
   } = useEditorStore()
+
+  // Criar layout padrão se não existir
+  useEffect(() => {
+    if (!layout) {
+      createNewLayout('Meu Layout', PAGE_FORMATS.A4)
+    }
+  }, [layout, createNewLayout])
 
   const pageWidth = currentPage?.config?.width || PAGE_FORMATS.A4.width
   const pageHeight = currentPage?.config?.height || PAGE_FORMATS.A4.height
@@ -31,7 +41,9 @@ function App() {
   }
 
   const handleNewLayout = () => {
-    createNewLayout('Novo Layout', PAGE_FORMATS.A4)
+    if (!layout) {
+      createNewLayout('Novo Layout', PAGE_FORMATS.A4)
+    }
     setShowWelcome(false)
   }
 
@@ -113,6 +125,15 @@ function App() {
                 <h6 className="mt-2 text-white">Suporte a Imagens</h6>
               </div>
             </div>
+
+            <div className="text-center mt-4">
+              <button 
+                onClick={() => setShowWelcome(false)}
+                className="btn btn-link text-white text-decoration-none opacity-75"
+              >
+                Pular introdução →
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -172,6 +193,14 @@ function App() {
 
               <button className="btn btn-outline-secondary btn-sm me-2">
                 <i className="bi bi-eye"></i>
+              </button>
+              
+              <button 
+                className={`btn btn-sm me-2 ${showPropertyPanel ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => setShowPropertyPanel(!showPropertyPanel)}
+                title="Painel de Propriedades"
+              >
+                <i className="bi bi-sliders"></i>
               </button>
               
               <button className="btn btn-outline-secondary btn-sm">
@@ -409,6 +438,13 @@ function App() {
               )}
             </div>
           </main>
+
+          {/* Property Panel */}
+          {showPropertyPanel && (
+            <div style={{ width: '300px' }}>
+              <PropertyPanel />
+            </div>
+          )}
         </div>
       </div>
 
