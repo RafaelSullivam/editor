@@ -396,6 +396,11 @@ export default ${currentPage.name?.replace(/\s+/g, '') || 'Layout'}Component`
   const generateCompleteJsPDFProject = () => {
     if (!currentPage) return ''
     
+    // **CORREÇÃO**: Detectar se dimensões estão em mm ou px
+    const pageWidth = currentPage.config?.width || 210
+    const pageHeight = currentPage.config?.height || 297
+    const isInMM = pageWidth <= 500 && pageHeight <= 500 // Se pequeno, provavelmente mm
+    
     let code = `import jsPDF from 'jspdf'
 
 // Função para gerar PDF do layout: ${currentPage.name || 'Layout'}
@@ -403,17 +408,23 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
   const doc = new jsPDF()
   
   // Configurar página
-  const pageWidth = ${currentPage.config?.width || 794} // pixels
-  const pageHeight = ${currentPage.config?.height || 1123} // pixels
+  const pageWidth = ${pageWidth} // ${isInMM ? 'mm' : 'pixels'}
+  const pageHeight = ${pageHeight} // ${isInMM ? 'mm' : 'pixels'}
   
-  // Converter pixels para mm (assumindo 96 DPI)
+  ${!isInMM ? `// Converter pixels para mm (assumindo 96 DPI)
   const pxToMm = (px: number) => px * 0.264583
   const pageWidthMm = pxToMm(pageWidth)
   const pageHeightMm = pxToMm(pageHeight)
   
   // Configurar formato da página
   doc.internal.pageSize.setWidth(pageWidthMm)
-  doc.internal.pageSize.setHeight(pageHeightMm)
+  doc.internal.pageSize.setHeight(pageHeightMm)` : `// Dimensões já em mm
+  const pageWidthMm = pageWidth
+  const pageHeightMm = pageHeight
+  
+  // Configurar formato da página
+  doc.internal.pageSize.setWidth(pageWidthMm)
+  doc.internal.pageSize.setHeight(pageHeightMm)`}
   
   // Adicionar elementos
 `
@@ -426,10 +437,13 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
       code += `
   // Elemento ${index + 1}: ${element.type} - ${element.name || 'Sem nome'}
   {
-    const x = pxToMm(${bounds.x || 0})
+    ${!isInMM ? `const x = pxToMm(${bounds.x || 0})
     const y = pxToMm(${bounds.y || 0})
     const width = pxToMm(${bounds.width || 100})
-    const height = pxToMm(${bounds.height || 20})
+    const height = pxToMm(${bounds.height || 20})` : `const x = ${bounds.x || 0} // mm
+    const y = ${bounds.y || 0} // mm
+    const width = Math.max(5, ${bounds.width || 100}) // mm, mínimo 5mm
+    const height = Math.max(5, ${bounds.height || 20}) // mm, mínimo 5mm`}
     
 `
 
@@ -464,7 +478,7 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
     const strokeG = parseInt(strokeColor.substr(2, 2), 16)
     const strokeB = parseInt(strokeColor.substr(4, 2), 16)
     doc.setDrawColor(strokeR, strokeG, strokeB)` : ''}
-    ${element.strokeWidth ? `doc.setLineWidth(${element.strokeWidth})` : ''}
+    ${element.strokeWidth ? `doc.setLineWidth(Math.max(0.1, ${element.strokeWidth} * 0.3)) // Reduzir espessura` : ''}
     
     // Adicionar retângulo
     doc.rect(x, y, width, height, '${element.fill ? (element.strokeWidth ? 'FD' : 'F') : (element.strokeWidth ? 'S' : 'S')}')
@@ -479,7 +493,7 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
     const lineG = parseInt(lineColor.substr(2, 2), 16)
     const lineB = parseInt(lineColor.substr(4, 2), 16)
     doc.setDrawColor(lineR, lineG, lineB)` : 'doc.setDrawColor(0, 0, 0)'}
-    ${element.strokeWidth ? `doc.setLineWidth(${element.strokeWidth})` : 'doc.setLineWidth(1)'}
+    ${element.strokeWidth ? `doc.setLineWidth(Math.max(0.1, ${element.strokeWidth} * 0.3)) // Reduzir espessura` : 'doc.setLineWidth(0.3)'}
     
     // Adicionar linha
     doc.line(x, y, x + width, y)
@@ -549,6 +563,12 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
     console.log('elements count:', currentPage?.elements?.length || 0)
     if (currentPage?.elements && currentPage.elements.length > 0) {
       console.log('first element:', currentPage.elements[0])
+      console.log('all elements:', currentPage.elements.map(e => ({ 
+        id: e.id, 
+        type: e.type, 
+        name: e.name, 
+        content: e.type === 'text' ? e.content?.substring(0, 50) + '...' : 'N/A' 
+      })))
     }
     console.log('=== END DEBUG ===')
     

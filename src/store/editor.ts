@@ -21,6 +21,7 @@ interface EditorStore extends EditorState {
   
   // Actions
   setLayout: (layout: Layout) => void
+  applyTemplate: (templateLayout: Layout) => void
   createNewLayout: (name: string, pageFormat: { width: number; height: number }) => void
   updateLayout: (updates: Partial<Layout>) => void
   
@@ -129,6 +130,57 @@ export const useEditorStore = create<EditorStore>()(
         selectedElementIds: [],
       })
       get().pushHistory('Layout loaded')
+    },
+
+    applyTemplate: (templateLayout: Layout) => {
+      const { layout, currentPageId } = get()
+      
+      if (!layout || !currentPageId) {
+        // Se não há layout atual, usar setLayout normalmente
+        get().setLayout(templateLayout)
+        return
+      }
+      
+      // Preservar elementos existentes e adicionar elementos do template
+      const currentPage = layout.pages.find(p => p.id === currentPageId)
+      if (!currentPage) return
+      
+      const templatePage = templateLayout.pages[0]
+      if (!templatePage) return
+      
+      // Combinar elementos existentes com elementos do template
+      const combinedElements = [
+        ...(currentPage.elements || []),
+        ...(templatePage.elements || []).map((element: Element) => ({
+          ...element,
+          id: uuidv4() // Novo ID para evitar conflitos
+        }))
+      ]
+      
+      // Atualizar a página atual
+      const updatedPages = layout.pages.map(page =>
+        page.id === currentPageId
+          ? {
+              ...page,
+              elements: combinedElements,
+              // Manter configuração da página atual, mas permitir override do template se necessário
+              config: templatePage.config || page.config
+            }
+          : page
+      )
+      
+      const updatedLayout = {
+        ...layout,
+        pages: updatedPages,
+        updatedAt: new Date().toISOString(),
+      }
+      
+      set({ 
+        layout: updatedLayout,
+        currentPage: updatedPages.find(p => p.id === currentPageId),
+      })
+      
+      get().pushHistory('Template aplicado')
     },
 
     createNewLayout: (name, pageFormat) => {

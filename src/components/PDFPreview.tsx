@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import jsPDF from 'jspdf'
 import { useEditorStore } from '../store/editor'
 
@@ -14,6 +14,16 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
 
   const { currentPage } = useEditorStore()
 
+  // Debug: Monitorar mudanças na currentPage
+  useEffect(() => {
+    console.log('🔍 PDFPreview - currentPage mudou:', {
+      hasCurrentPage: !!currentPage,
+      pageId: currentPage?.id,
+      elementsCount: currentPage?.elements?.length || 0,
+      elements: currentPage?.elements || []
+    })
+  }, [currentPage])
+
   const generatePDF = async () => {
     if (!currentPage || !currentPage.elements.length) {
       setNotification({ type: 'error', message: 'Nenhum elemento encontrado para gerar PDF' })
@@ -24,15 +34,29 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
     setIsGenerating(true)
     
     try {
-      // Configurar página
-      const pageWidth = currentPage.config?.width || 794 // pixels
-      const pageHeight = currentPage.config?.height || 1123 // pixels
+      // **CORREÇÃO CRÍTICA**: Verificar se config já está em mm ou px
+      const pageWidth = currentPage.config?.width || 210 // mm (A4)
+      const pageHeight = currentPage.config?.height || 297 // mm (A4)
       
-      // Converter pixels para mm - usando conversão mais apropriada para editor
-      // 1 pixel no editor = 0.35 mm no PDF (aproximadamente 72 DPI)
-      const pxToMm = (px: number) => px * 0.2646
-      const pageWidthMm = pxToMm(pageWidth)
-      const pageHeightMm = pxToMm(pageHeight)
+      console.log('📏 Config da página original:', currentPage.config)
+      console.log('📏 Dimensões detectadas:', { pageWidth, pageHeight })
+      
+      // **PROBLEMA IDENTIFICADO**: Não converter se já estiver em mm
+      // As dimensões do config são muito pequenas, indicando que já estão em mm
+      let pageWidthMm = pageWidth
+      let pageHeightMm = pageHeight
+      
+      // Se as dimensões forem muito grandes (>500), provavelmente estão em pixels
+      if (pageWidth > 500 || pageHeight > 500) {
+        console.log('📏 Dimensões grandes detectadas, aplicando conversão px->mm')
+        const pxToMm = (px: number) => px * 0.2646
+        pageWidthMm = pxToMm(pageWidth)
+        pageHeightMm = pxToMm(pageHeight)
+      } else {
+        console.log('📏 Dimensões pequenas detectadas, usando como mm direto')
+      }
+      
+      console.log('📏 Dimensões finais da página (mm):', { pageWidthMm, pageHeightMm })
       
       // Configurar formato da página (usar format personalizado)
       const format: [number, number] = [pageWidthMm, pageHeightMm]
@@ -42,26 +66,83 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
         orientation: pageWidthMm > pageHeightMm ? 'landscape' : 'portrait'
       })
       
-      // Adicionar elementos
+      console.log('=== DEBUG PDF GENERATION ===')
       console.log('Elementos a processar:', currentPage.elements.length)
+      console.log('Página config:', currentPage.config)
+      
+      if (currentPage.elements.length === 0) {
+        console.error('❌ PROBLEMA: Nenhum elemento encontrado na página!')
+        console.log('CurrentPage completa:', currentPage)
+        setNotification({ type: 'error', message: 'Nenhum elemento encontrado para gerar PDF' })
+        setTimeout(() => setNotification(null), 3000)
+        return
+      }
+      
+      // **DEBUG VISUAL**: Adicionar marca d'água de debug - REMOVIDO
+      // doc.setFontSize(8)
+      // doc.setTextColor(200, 200, 200)  
+      // doc.text(`DEBUG: ${currentPage.elements.length} elementos`, 10, 10)
       
       for (let i = 0; i < currentPage.elements.length; i++) {
         const element = currentPage.elements[i] as any
         const bounds = element.bounds || {}
         const transform = element.transform || {}
         
-        console.log(`Processando elemento ${i + 1}:`, {
-          type: element.type,
-          bounds,
-          element: { ...element, bounds: undefined, transform: undefined }
-        })
+        console.log(`\n--- Elemento ${i + 1} ---`)
+        console.log('Tipo:', element.type)
+        console.log('Bounds originais:', bounds)
         
-        const x = pxToMm(bounds.x || 0)
-        const y = pxToMm(bounds.y || 0)
-        const width = pxToMm(bounds.width || 100)
-        const height = pxToMm(bounds.height || 20)
+        // **DEBUG CSS**: Verificar propriedades principais
+        if (element.type === 'text') {
+          console.log('Text - fontSize:', element.fontSize, 'color:', element.color, 'content:', element.content)
+        }
+        if (element.type === 'rectangle') {
+          console.log('Rectangle - fill:', element.fill, 'stroke:', element.stroke, 'strokeWidth:', element.strokeWidth)
+        }
         
-        console.log(`Posições convertidas:`, { x, y, width, height })
+        // Verificar se bounds tem as propriedades corretas
+        if (!bounds.x && bounds.x !== 0) {
+          console.error('ERRO: bounds.x não definido!', bounds)
+        }
+        if (!bounds.y && bounds.y !== 0) {
+          console.error('ERRO: bounds.y não definido!', bounds)
+        }
+        if (!bounds.width) {
+          console.error('ERRO: bounds.width não definido!', bounds)
+        }
+        if (!bounds.height) {
+          console.error('ERRO: bounds.height não definido!', bounds)
+        }
+        
+        // **CORREÇÃO CRÍTICA**: As coordenadas já estão em mm no store!
+        // Não devemos aplicar pxToMm pois causaria conversão dupla
+        let x = bounds.x || 0
+        let y = bounds.y || 0  
+        let width = bounds.width || 100
+        let height = bounds.height || 20
+        
+        // **CORREÇÃO: Garantir dimensões mínimas visíveis**
+        const minWidth = 5  // 5mm mínimo
+        const minHeight = 5 // 5mm mínimo
+        
+        if (width < minWidth) {
+          console.warn(`⚠️ Width muito pequeno (${width}mm), ajustando para ${minWidth}mm`)
+          width = minWidth
+        }
+        if (height < minHeight) {
+          console.warn(`⚠️ Height muito pequeno (${height}mm), ajustando para ${minHeight}mm`)
+          height = minHeight
+        }
+        
+        console.log('Coordenadas finais (já em mm):', { x, y, width, height })
+        console.log('Verificando se coordenadas fazem sentido...')
+        
+        if (x < 0 || y < 0) {
+          console.warn('Coordenadas negativas detectadas:', { x, y })
+        }
+        if (x > pageWidthMm || y > pageHeightMm) {
+          console.warn('Elemento fora da página:', { x, y, pageWidthMm, pageHeightMm })
+        }
         
         // Aplicar opacidade se necessário (simplificado)
         if (transform.opacity && transform.opacity !== 1) {
@@ -70,9 +151,24 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
         
         switch (element.type) {
           case 'text':
-            // Configurar texto
-            doc.setFont(element.fontFamily || 'helvetica', element.fontWeight || 'normal')
-            doc.setFontSize(element.fontSize || 14)
+            console.log('📝 Processando elemento TEXT')
+            
+            // **PROBLEMA IDENTIFICADO**: Verificar se as propriedades CSS estão presentes
+            console.log('🔍 Verificando propriedades de texto:')
+            console.log('fontSize:', element.fontSize, '(padrão: 12)')
+            console.log('fontFamily:', element.fontFamily, '(padrão: Arial)')
+            console.log('fontWeight:', element.fontWeight, '(padrão: normal)')
+            console.log('color:', element.color, '(padrão: #000000)')
+            console.log('content:', element.content, '(padrão: Texto)')
+            
+            // Configurar texto com valores garantidos
+            const fontSize = element.fontSize || 12
+            const fontFamily = element.fontFamily || 'helvetica'
+            const fontWeight = element.fontWeight || 'normal'
+            
+            doc.setFont(fontFamily, fontWeight)
+            doc.setFontSize(fontSize)
+            console.log('✅ Fonte configurada:', fontFamily, fontWeight, fontSize)
             
             if (element.color) {
               const color = element.color.replace('#', '')
@@ -80,20 +176,39 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
               const g = parseInt(color.substr(2, 2), 16)
               const b = parseInt(color.substr(4, 2), 16)
               doc.setTextColor(r, g, b)
+              console.log('✅ Cor do texto aplicada:', element.color, '->', { r, g, b })
             } else {
               doc.setTextColor(0, 0, 0)
+              console.log('✅ Cor padrão aplicada: preto')
             }
             
             // Adicionar texto
             const textContent = element.content || 'Texto'
+            console.log('📝 Adicionando texto:', textContent, 'na posição:', { x, y })
             
             // Calcular posição Y centralizada verticalmente
             const textY = y + height / 2
             
             doc.text(textContent, x, textY)
+            console.log('✅ Texto adicionado com sucesso!')
             break
             
           case 'rectangle':
+            console.log('🔲 Processando elemento RECTANGLE')
+            
+            // **PROBLEMA IDENTIFICADO**: Verificar propriedades de retângulo
+            console.log('🔍 Verificando propriedades de retângulo:')
+            console.log('fill:', element.fill, '(cor de fundo)')
+            console.log('stroke:', element.stroke, '(cor da borda)')
+            console.log('strokeWidth:', element.strokeWidth, '(espessura da borda)')
+            console.log('backgroundColor:', element.backgroundColor, '(alternativo)')
+            console.log('dimensões finais:', { x, y, width, height })
+            
+            // **DEBUG VISUAL**: Adicionar informações no PDF para debug
+            if (width < 10 || height < 10) {
+              console.warn('🚨 ELEMENTO MUITO PEQUENO! Pode ser invisível no PDF')
+            }
+            
             // Configurar retângulo
             if (element.fill) {
               const fillColor = element.fill.replace('#', '')
@@ -101,6 +216,7 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
               const fillG = parseInt(fillColor.substr(2, 2), 16)
               const fillB = parseInt(fillColor.substr(4, 2), 16)
               doc.setFillColor(fillR, fillG, fillB)
+              console.log('✅ Cor de preenchimento aplicada:', element.fill, '->', { fillR, fillG, fillB })
             }
             
             if (element.stroke) {
@@ -112,12 +228,23 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
             }
             
             if (element.strokeWidth) {
-              doc.setLineWidth(pxToMm(element.strokeWidth))
+              // Converter strokeWidth para escala apropriada (reduzir espessura)
+              const strokeWidthMm = Math.max(0.1, (element.strokeWidth || 1) * 0.3)
+              doc.setLineWidth(strokeWidthMm)
+              console.log('✅ StrokeWidth aplicado:', element.strokeWidth, '->', strokeWidthMm, 'mm')
             }
             
             // Determinar estilo de preenchimento
             const fillStyle = element.fill ? (element.strokeWidth ? 'FD' : 'F') : (element.strokeWidth ? 'S' : 'S')
+            console.log('🔲 Desenhando retângulo:', { x, y, width, height, fillStyle })
             doc.rect(x, y, width, height, fillStyle)
+            
+            // **DEBUG VISUAL**: Texto de debug removido para produção
+            // doc.setFontSize(6)
+            // doc.setTextColor(255, 0, 0)
+            // doc.text(`R${i+1}`, x + 1, y + 3)
+            
+            console.log('✅ Retângulo adicionado com sucesso!')
             break
             
           case 'line':
@@ -132,7 +259,10 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
               doc.setDrawColor(0, 0, 0)
             }
             
-            doc.setLineWidth(pxToMm(element.strokeWidth || 1))
+            // strokeWidth para linhas - reduzir espessura  
+            const lineWidthMm = Math.max(0.1, (element.strokeWidth || 1) * 0.3)
+            doc.setLineWidth(lineWidthMm)
+            console.log('Line strokeWidth aplicado:', element.strokeWidth, '->', lineWidthMm, 'mm')
             doc.line(x, y, x + width, y)
             break
             
@@ -162,7 +292,7 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
           default:
             // Elemento não suportado - desenhar placeholder
             doc.setDrawColor(100, 100, 100)
-            doc.setLineWidth(pxToMm(1))
+            doc.setLineWidth(1) // 1mm
             doc.rect(x, y, width, height, 'S')
             doc.setFontSize(6)
             doc.setTextColor(100, 100, 100)
@@ -175,9 +305,16 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
         }
       }
       
+      console.log('=== FINALIZANDO PDF ===')
+      console.log('Total de elementos processados:', currentPage.elements.length)
+      console.log('Dimensões da página PDF (mm):', { pageWidthMm, pageHeightMm })
+      
       // Gerar URL do PDF
       const pdfBlob = doc.output('blob')
+      console.log('PDF blob gerado:', pdfBlob.size, 'bytes')
+      
       const url = URL.createObjectURL(pdfBlob)
+      console.log('PDF URL criada:', url)
       
       // Limpar URL anterior se existir
       if (pdfUrl) {
@@ -187,9 +324,10 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
       setPdfUrl(url)
       setNotification({ type: 'success', message: 'PDF gerado com sucesso!' })
       setTimeout(() => setNotification(null), 3000)
+      console.log('=== PDF GERADO COM SUCESSO ===')
       
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error)
+      console.error('=== ERRO AO GERAR PDF ===', error)
       setNotification({ type: 'error', message: 'Erro ao gerar PDF. Verifique os elementos.' })
       setTimeout(() => setNotification(null), 3000)
     } finally {
@@ -254,6 +392,20 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ className = '' }) => {
                   Gerar PDF
                 </>
               )}
+            </button>
+            
+            {/* Botão de Teste para Debug */}
+            <button
+              className="btn btn-warning btn-sm"
+              onClick={() => {
+                console.log('🧪 TESTE MANUAL - Estado da Store:')
+                console.log('currentPage:', currentPage)
+                console.log('elementos:', currentPage?.elements)
+                console.log('total elementos:', currentPage?.elements?.length || 0)
+              }}
+            >
+              <i className="bi bi-bug me-2"></i>
+              Debug
             </button>
             
             {pdfUrl && (

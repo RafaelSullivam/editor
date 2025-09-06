@@ -105,10 +105,12 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
 
   // Create element at specific position based on current tool
   const createElementAtPosition = (x: number, y: number) => {
-    console.log('Creating element at position:', x, y, 'with tool:', tool)
+    console.log('=== CRIANDO ELEMENTO ===')
+    console.log('Posição:', x, y, 'Tool:', tool)
+    console.log('CurrentPage disponível:', !!currentPage)
     
     if (!currentPage) {
-      console.error('No current page available to add elements')
+      console.error('ERROR: No current page available to add elements')
       return
     }
     
@@ -269,15 +271,17 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
         }
         break
         
-      default:
-        return
+        default:
+          return
     }
     
+    console.log('Elemento criado:', newElement.type, newElement.id)
+    console.log('Chamando addElement...')
     addElement(newElement)
+    console.log('addElement chamado, selecionando elemento...')
     selectElement(newElement.id, false)
-  }
-
-  // Handle mouse move for dragging
+    console.log('=== ELEMENTO CRIADO COM SUCESSO ===')
+  }  // Handle mouse move for dragging
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (!dragState.isDragging || !dragState.elementId || !canvasRef.current) return

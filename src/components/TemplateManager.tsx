@@ -12,7 +12,7 @@ interface TemplateManagerProps {
 export const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<'templates' | 'elements'>('templates')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
-  const { setLayout, addElement, currentPage } = useEditorStore()
+  const { setLayout, applyTemplate, addElement, currentPage } = useEditorStore()
 
   const templateCategories = [
     { id: '', name: 'Todos' },
@@ -73,13 +73,21 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => 
     console.log('Layout criado com páginas:', newLayout.pages.length)
     console.log('Elementos na primeira página:', newLayout.pages[0]?.elements?.length || 0)
     
-    setLayout(newLayout)
-    console.log('setLayout chamado')
+    // Usar applyTemplate em vez de setLayout para preservar elementos existentes
+    if (currentPage && currentPage.elements && currentPage.elements.length > 0) {
+      console.log('Aplicando template sobre layout existente com', currentPage.elements.length, 'elementos')
+      applyTemplate(newLayout)
+    } else {
+      console.log('Aplicando template como novo layout')
+      setLayout(newLayout)
+    }
+    
+    console.log('Template aplicado')
     
     // Verificar estado após aplicação (com delay para garantir atualização)
     setTimeout(() => {
       const currentState = window.editorStore?.getState()
-      console.log('Estado após setLayout - CurrentPage elements:', currentState?.currentPage?.elements?.length || 0)
+      console.log('Estado após aplicação - CurrentPage elements:', currentState?.currentPage?.elements?.length || 0)
       console.log('=== END TEMPLATE SELECT DEBUG ===')
     }, 100)
     
