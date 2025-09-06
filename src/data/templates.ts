@@ -40,6 +40,7 @@ export const defaultTemplates: Template[] = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       metadata: {},
+      dataSources: [],
       pages: [{
         id: uuidv4(),
         name: 'Página 1',
@@ -51,7 +52,15 @@ export const defaultTemplates: Template[] = [
           dpi: 96,
           margins: { top: 20, right: 20, bottom: 20, left: 20 },
         },
-        elements: []
+        elements: [],
+        guides: [],
+        snapSettings: {
+          snapToGrid: false,
+          snapToElements: true,
+          snapToGuides: true,
+          snapThreshold: 5,
+          showSnapLines: true
+        }
       }]
     }
   },
@@ -70,6 +79,7 @@ export const defaultTemplates: Template[] = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       metadata: {},
+      dataSources: [],
       pages: [{
         id: uuidv4(),
         name: 'Certificado',
@@ -81,7 +91,15 @@ export const defaultTemplates: Template[] = [
           dpi: 96,
           margins: { top: 20, right: 20, bottom: 20, left: 20 },
         },
-        elements: []
+        elements: [],
+        guides: [],
+        snapSettings: {
+          snapToGrid: false,
+          snapToElements: true,
+          snapToGuides: true,
+          snapThreshold: 5,
+          showSnapLines: true
+        }
       }]
     }
   }

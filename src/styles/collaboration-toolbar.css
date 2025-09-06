@@ -1,0 +1,231 @@
+/* Collaboration Toolbar Styles */
+
+.collaboration-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f8f9fa;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.connection-text {
+  color: #6c757d;
+}
+
+.collaboration-toolbar .btn {
+  font-size: 13px;
+  padding: 6px 12px;
+  font-weight: 500;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.collaboration-toolbar .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.collaboration-toolbar .btn i {
+  margin-right: 6px;
+}
+
+.collaboration-toolbar .btn-outline-primary {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.collaboration-toolbar .btn-outline-primary:hover {
+  background: #007bff;
+  color: white;
+}
+
+.collaboration-toolbar .btn-primary {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.collaboration-toolbar .btn-success {
+  background: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.collaboration-toolbar .btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.collaboration-toolbar .dropdown-menu {
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  padding: 8px 0;
+  min-width: 250px;
+}
+
+.collaboration-toolbar .dropdown-item {
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.collaboration-toolbar .dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+.collaboration-toolbar .dropdown-item-text {
+  padding: 4px 16px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.collaboration-toolbar .form-range {
+  margin: 4px 0;
+}
+
+.collaboration-toolbar .dropdown-divider {
+  margin: 8px 0;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Collaboration Provider */
+
+.collaboration-provider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Spinning animation for connecting state */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Status indicators */
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+/* Panel positioning */
+.collaboration-panel,
+.version-history-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1050;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.version-history-panel {
+  right: 490px; /* Position left of collaboration panel */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .collaboration-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  
+  .collaboration-toolbar .btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .collaboration-toolbar .btn i {
+    margin-right: 4px;
+  }
+  
+  .connection-status {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  
+  .collaboration-panel,
+  .version-history-panel {
+    top: 60px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-height: calc(100vh - 80px);
+  }
+  
+  .version-history-panel {
+    right: 10px; /* Same position as collaboration panel on mobile */
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .collaboration-toolbar {
+    background: #2d3748;
+    border-bottom-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .connection-status {
+    background: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .connection-text {
+    color: #a0aec0;
+  }
+  
+  .collaboration-toolbar .dropdown-menu {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  .collaboration-toolbar .dropdown-item {
+    color: #e2e8f0;
+  }
+  
+  .collaboration-toolbar .dropdown-item:hover {
+    background: #4a5568;
+  }
+  
+  .collaboration-toolbar .dropdown-item-text {
+    color: #a0aec0;
+  }
+  
+  .collaboration-toolbar .dropdown-divider {
+    border-top-color: #4a5568;
+  }
+}

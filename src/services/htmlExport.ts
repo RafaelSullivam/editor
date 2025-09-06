@@ -265,24 +265,25 @@ export class HTMLExportService {
     let tableHTML = '<table>'
     
     // Header
-    if (element.showHeader && element.columns.length > 0) {
-      const headerStyle = element.headerStyle || { 
-        backgroundColor: '#f5f5f5', 
+    if (element.display.showHeaders && element.columns.length > 0) {
+      const headerStyle = element.globalStyle || { 
+        fontFamily: 'Arial',
         fontSize: 12, 
-        fontWeight: 'bold' as const, 
-        color: '#000000', 
-        height: 30 
+        color: '#000000',
+        borderColor: '#cccccc',
+        borderWidth: 1,
+        borderStyle: 'solid'
       }
       tableHTML += `<thead><tr style="
-        background-color: ${headerStyle.backgroundColor};
+        background-color: #f5f5f5;
         font-size: ${headerStyle.fontSize}px;
-        font-weight: ${headerStyle.fontWeight};
+        font-weight: bold;
         color: ${headerStyle.color};
-        height: ${headerStyle.height}px;
+        height: 30px;
       ">`
       
       element.columns.forEach(col => {
-        tableHTML += `<th style="text-align: ${col.textAlign || 'left'}">${this.escapeHtml(col.title)}</th>`
+        tableHTML += `<th style="text-align: left">${this.escapeHtml(col.headerText || col.name)}</th>`
       })
       
       tableHTML += '</tr></thead>'
@@ -290,31 +291,31 @@ export class HTMLExportService {
     
     // Body - sample data or from data context
     tableHTML += '<tbody>'
-    const rowStyle = element.rowStyle || { 
-      backgroundColor: 'transparent', 
-      alternateBackgroundColor: '#f9f9f9', 
+    const globalStyle = element.globalStyle || { 
+      fontFamily: 'Arial',
       fontSize: 12, 
-      color: '#000000', 
-      height: 25 
+      color: '#000000',
+      borderColor: '#cccccc',
+      borderWidth: 1,
+      borderStyle: 'solid'
     }
     
     // Generate sample rows if no data
     const rows = this.getTableData(element, this.options.data || {})
     rows.forEach((row, index) => {
-      const bgColor = index % 2 === 0 ? 
-        rowStyle.backgroundColor : 
-        rowStyle.alternateBackgroundColor
+      const bgColor = element.display.alternateRowColors && index % 2 === 1 ? 
+        (element.display.zebra?.oddColor || '#f9f9f9') : 
+        (element.display.zebra?.evenColor || 'transparent')
       
       tableHTML += `<tr style="
         background-color: ${bgColor};
-        font-size: ${rowStyle.fontSize}px;
-        color: ${rowStyle.color};
-        height: ${rowStyle.height}px;
+        font-size: ${globalStyle.fontSize}px;
+        color: ${globalStyle.color};
+        height: 25px;
       ">`
       
-      row.forEach((cell, colIndex) => {
-        const col = element.columns[colIndex]
-        tableHTML += `<td style="text-align: ${col?.textAlign || 'left'}">${this.escapeHtml(cell)}</td>`
+      row.forEach((cell) => {
+        tableHTML += `<td style="text-align: left">${this.escapeHtml(cell)}</td>`
       })
       
       tableHTML += '</tr>'
@@ -399,8 +400,8 @@ export class HTMLExportService {
     // For demonstration, create sample rows
     for (let i = 0; i < 3; i++) {
       const row = element.columns.map(col => {
-        if (col.field && this.options.data) {
-          return this.getFieldValue(col.field, data) || `Item ${i + 1}`
+        if (col.dataField && this.options.data) {
+          return this.getFieldValue(col.dataField, data) || `Item ${i + 1}`
         }
         return `Valor ${i + 1}`
       })

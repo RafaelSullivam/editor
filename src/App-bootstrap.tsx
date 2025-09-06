@@ -3,7 +3,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import { useEditorStore } from './store/editor'
 import PDFViewer from './components/PDFViewer'
 import CanvasOverlay from './components/CanvasOverlay'
-import Toolbar from './components/Toolbar'
 import { PAGE_FORMATS } from './types'
 
 function App() {
@@ -17,11 +16,11 @@ function App() {
   const {
     currentPage,
     addPage,
-    setPageFormat
+    updatePage
   } = useEditorStore()
 
-  const pageWidth = currentPage?.format?.width || PAGE_FORMATS.A4.width
-  const pageHeight = currentPage?.format?.height || PAGE_FORMATS.A4.height
+  const pageWidth = currentPage?.config?.width || PAGE_FORMATS.A4.width
+  const pageHeight = currentPage?.config?.height || PAGE_FORMATS.A4.height
 
   const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -200,15 +199,26 @@ function App() {
                     </label>
                     <select 
                       className="form-select form-select-sm"
-                      value={currentPage?.format?.name || 'A4'}
+                      value={Object.entries(PAGE_FORMATS).find(([_, format]) => 
+                        format.width === currentPage?.config.width && 
+                        format.height === currentPage?.config.height
+                      )?.[0] || 'A4'}
                       onChange={(e) => {
-                        const format = Object.values(PAGE_FORMATS).find(f => f.name === e.target.value)
-                        if (format) setPageFormat(format)
+                        const format = PAGE_FORMATS[e.target.value as keyof typeof PAGE_FORMATS]
+                        if (format && currentPage) {
+                          updatePage(currentPage.id, {
+                            config: {
+                              ...currentPage.config,
+                              width: format.width,
+                              height: format.height
+                            }
+                          })
+                        }
                       }}
                     >
-                      {Object.values(PAGE_FORMATS).map(format => (
-                        <option key={format.name} value={format.name}>
-                          {format.name} ({format.width}×{format.height}mm)
+                      {Object.entries(PAGE_FORMATS).map(([name, format]) => (
+                        <option key={name} value={name}>
+                          {name} ({format.width}×{format.height}mm)
                         </option>
                       ))}
                     </select>
@@ -238,7 +248,7 @@ function App() {
                   </h6>
                   
                   <div 
-                    className="border border-2 border-dashed rounded p-4 text-center bg-light"
+                    className="border-2 border-dashed rounded p-4 text-center bg-light"
                     onClick={() => fileInputRef.current?.click()}
                     style={{ cursor: 'pointer' }}
                   >
@@ -335,7 +345,6 @@ function App() {
                         pageNumber={1}
                         scale={zoom}
                         className="position-absolute top-0 start-0"
-                        style={{ top: '64px' }}
                       />
                     )}
                     

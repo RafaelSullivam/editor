@@ -128,6 +128,7 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           visible: true,
           zIndex: 0,
           content: 'Novo Texto',
+          isDynamic: false,
           fontSize: 12,
           fontFamily: 'Arial',
           fontWeight: 'normal',
@@ -200,23 +201,71 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           visible: true,
           zIndex: 0,
           columns: [
-            { id: '1', title: 'Col 1', field: 'col1', width: 'auto', textAlign: 'left', fontSize: 12, fontWeight: 'normal', color: '#000000' },
-            { id: '2', title: 'Col 2', field: 'col2', width: 'auto', textAlign: 'left', fontSize: 12, fontWeight: 'normal', color: '#000000' },
-            { id: '3', title: 'Col 3', field: 'col3', width: 'auto', textAlign: 'left', fontSize: 12, fontWeight: 'normal', color: '#000000' },
+            { 
+              id: '1', 
+              name: 'Col 1',
+              width: 100,
+              resizable: true,
+              sortable: true,
+              visible: true,
+              frozen: false,
+              dataField: 'col1',
+              headerText: 'Col 1'
+            },
+            { 
+              id: '2', 
+              name: 'Col 2',
+              width: 100,
+              resizable: true,
+              sortable: true,
+              visible: true,
+              frozen: false,
+              dataField: 'col2',
+              headerText: 'Col 2'
+            },
+            { 
+              id: '3', 
+              name: 'Col 3',
+              width: 100,
+              resizable: true,
+              sortable: true,
+              visible: true,
+              frozen: false,
+              dataField: 'col3',
+              headerText: 'Col 3'
+            },
           ],
-          headerStyle: {
-            backgroundColor: '#f5f5f5',
+          rows: [],
+          globalStyle: {
+            fontFamily: 'Arial',
             fontSize: 12,
-            fontWeight: 'bold',
             color: '#000000',
-            height: 30,
+            borderColor: '#cccccc',
+            borderWidth: 1,
+            borderStyle: 'solid'
           },
-          showHeader: true,
-          showBorders: true,
-          borderColor: '#000000',
-          borderWidth: 1,
-          pageBreak: false,
-          repeatHeader: true,
+          display: {
+            showHeaders: true,
+            showBorders: true,
+            showGridLines: true,
+            alternateRowColors: false
+          },
+          pagination: {
+            enabled: false,
+            pageBreaks: true,
+            repeatHeaders: true
+          },
+          features: {
+            sorting: false,
+            filtering: false,
+            grouping: false,
+            totals: false,
+            selection: false
+          },
+          layout: {
+            fixedLayout: false,
+            autoWidth: false
+          }
         }
         break
         

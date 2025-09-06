@@ -201,11 +201,11 @@ export class PDFExportService {
     if (!element.columns.length) return
 
     // Prepare table data
-    const headers = element.columns.map(col => col.title)
+    const headers = element.columns.map(col => col.headerText || col.name)
     const data: string[][] = []
 
     // If we have data context, try to populate table
-    if (this.options.data && element.columns[0].field) {
+    if (this.options.data && element.columns[0].dataField) {
       const tableData = this.getTableData(element, this.options.data)
       data.push(...tableData)
     } else {
@@ -215,30 +215,30 @@ export class PDFExportService {
 
     // Configure autoTable
     autoTable(this.pdf, {
-      head: element.showHeader ? [headers] : undefined,
+      head: element.display.showHeaders ? [headers] : undefined,
       body: data,
       startY: bounds.y,
       margin: { left: bounds.x },
       tableWidth: bounds.width,
       styles: {
-        fontSize: element.rowStyle?.fontSize || 12,
-        textColor: element.rowStyle?.color || '#000000',
+        fontSize: element.globalStyle?.fontSize || 12,
+        textColor: element.globalStyle?.color || '#000000',
         cellPadding: 2,
       },
       headStyles: {
-        fontSize: element.headerStyle?.fontSize || 12,
-        textColor: element.headerStyle?.color || '#000000',
-        fillColor: element.headerStyle?.backgroundColor || '#f5f5f5',
-        fontStyle: element.headerStyle?.fontWeight || 'bold',
+        fontSize: element.globalStyle?.fontSize || 12,
+        textColor: element.globalStyle?.color || '#000000',
+        fillColor: '#f5f5f5',
+        fontStyle: 'bold',
       },
       columnStyles: element.columns.reduce((acc, col, index) => {
         acc[index] = {
-          cellWidth: col.width === 'auto' ? 'auto' : col.width,
-          halign: col.textAlign || 'left',
+          cellWidth: col.width,
+          halign: 'left',
         }
         return acc
       }, {} as any),
-      showHead: element.showHeader,
+      showHead: element.display.showHeaders,
       theme: 'grid',
     })
   }
@@ -327,8 +327,8 @@ export class PDFExportService {
     // For demonstration, create a few sample rows
     for (let i = 0; i < 5; i++) {
       const row = element.columns.map(col => {
-        if (col.field) {
-          return this.getFieldValue(col.field, data) || `Item ${i + 1}`
+        if (col.dataField) {
+          return this.getFieldValue(col.dataField, data) || `Item ${i + 1}`
         }
         return `Valor ${i + 1}`
       })

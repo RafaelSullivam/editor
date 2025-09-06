@@ -510,7 +510,6 @@ export type TextElement = z.infer<typeof TextElementSchema>
 export type ImageElement = z.infer<typeof ImageElementSchema>
 export type RectangleElement = z.infer<typeof RectangleElementSchema>
 export type LineElement = z.infer<typeof LineElementSchema>
-export type TableColumn = z.infer<typeof TableColumnSchema>
 export type TableElement = z.infer<typeof TableElementSchema>
 export type QRCodeElement = z.infer<typeof QRCodeElementSchema>
 export type BarcodeElement = z.infer<typeof BarcodeElementSchema>

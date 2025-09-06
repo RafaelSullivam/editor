@@ -1,0 +1,380 @@
+/* Version History Panel Styles */
+
+.version-history-panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  width: 450px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.version-history-header {
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.version-history-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.version-actions .btn-group {
+  margin-right: auto;
+}
+
+.new-version-form {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 1px solid #dee2e6;
+}
+
+.new-version-form .form-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+}
+
+.new-version-form .form-control {
+  font-size: 14px;
+  border: 1px solid #ced4da;
+}
+
+.new-version-form .form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.comparison-prompt {
+  margin-bottom: 16px;
+}
+
+.comparison-prompt .alert {
+  padding: 12px;
+  font-size: 14px;
+}
+
+.no-versions {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-versions i {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.versions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.version-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.version-item:hover {
+  border-color: #007bff;
+  background: #f8f9fa;
+}
+
+.version-item.selected {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.version-checkbox {
+  margin-top: 2px;
+}
+
+.version-checkbox input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+.version-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.version-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+  word-break: break-word;
+}
+
+.version-meta {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.version-meta .badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.version-description {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.version-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.version-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.version-date {
+  white-space: nowrap;
+}
+
+.version-changes {
+  font-weight: 500;
+}
+
+.version-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+.version-actions .btn {
+  padding: 6px 8px;
+  font-size: 12px;
+  min-width: 36px;
+}
+
+/* Version Comparison Styles */
+
+.version-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.comparison-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.comparison-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.version-info-card {
+  flex: 1;
+  text-align: center;
+}
+
+.version-info-card h6 {
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  color: #212529;
+}
+
+.version-info-card p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.comparison-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #007bff;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+}
+
+.differences-list h6 {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 16px;
+}
+
+.difference-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.difference-item.added {
+  background: #d4edda;
+  border-left: 4px solid #28a745;
+}
+
+.difference-item.modified {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.difference-item.removed {
+  background: #f8d7da;
+  border-left: 4px solid #dc3545;
+}
+
+.difference-icon {
+  margin-top: 2px;
+  font-size: 16px;
+}
+
+.difference-content strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #212529;
+}
+
+.difference-content p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.comparison-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.comparison-actions .btn {
+  flex: 1;
+}
+
+.comparison-error {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.comparison-error p {
+  color: #dc3545;
+  margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .version-history-panel {
+    width: calc(100vw - 40px);
+    max-width: 450px;
+  }
+  
+  .version-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .comparison-info {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .comparison-arrow {
+    transform: rotate(90deg);
+  }
+  
+  .comparison-actions {
+    flex-direction: column;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .version-history-panel {
+    background: #2d3748;
+    color: #e2e8f0;
+  }
+  
+  .version-history-header {
+    background: #4a5568;
+    border-bottom-color: #4a5568;
+  }
+  
+  .new-version-form {
+    background: #4a5568;
+    border-color: #4a5568;
+  }
+  
+  .version-item {
+    border-color: #4a5568;
+    background: #2d3748;
+  }
+  
+  .version-item:hover {
+    background: #4a5568;
+  }
+  
+  .version-item.selected {
+    background: #2c5aa0;
+    border-color: #63b3ed;
+  }
+  
+  .comparison-info {
+    background: #4a5568;
+  }
+  
+  .version-name {
+    color: #e2e8f0;
+  }
+  
+  .difference-content strong {
+    color: #e2e8f0;
+  }
+}
