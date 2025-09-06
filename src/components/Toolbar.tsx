@@ -2,13 +2,15 @@ import React from 'react'
 import { useEditorStore } from '../store/editor'
 
 interface ToolbarProps {
-  onSave?: () => void
+  onDownload?: () => void
+  onLoadFromFile?: () => void
   onExport?: () => void
   onImport?: () => void
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
-  onSave,
+  onDownload,
+  onLoadFromFile,
   onExport,
   onImport,
 }) => {
@@ -190,14 +192,24 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   <i className="bi-upload"></i>
                 </button>
               )}
-              {onSave && (
+              {onLoadFromFile && (
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={onSave}
-                  title="Salvar"
+                  className="btn btn-sm btn-outline-info"
+                  onClick={onLoadFromFile}
+                  title="Carregar Projeto do Arquivo"
                 >
-                  <i className="bi-save"></i>
+                  <i className="bi-folder-open"></i>
+                </button>
+              )}
+              {onDownload && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-success"
+                  onClick={onDownload}
+                  title="Baixar Projeto (JSON)"
+                >
+                  <i className="bi-download"></i>
                 </button>
               )}
               {onExport && (
@@ -207,7 +219,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   onClick={onExport}
                   title="Exportar"
                 >
-                  <i className="bi-download"></i>
+                  <i className="bi-box-arrow-right"></i>
                 </button>
               )}
             </div>

@@ -60,6 +60,8 @@ interface EditorStore extends EditorState {
   getElementById: (elementId: string) => Element | undefined
   getSelectedElements: () => Element[]
   exportLayout: () => Layout | null
+  downloadProject: () => void
+  loadFromFile: (file: File) => Promise<void>
 }
 
 const initialEditorState: EditorState = {
@@ -542,15 +544,42 @@ export const useEditorStore = create<EditorStore>()(
     exportLayout: () => {
       return get().layout
     },
-  }))
-)
 
-// Subscribe to layout changes for auto-save
-useEditorStore.subscribe(
-  (state) => state.layout,
-  (layout) => {
-    if (layout) {
-      localStorage.setItem('editor-layout-autosave', JSON.stringify(layout))
-    }
-  }
+    downloadProject: () => {
+      const layout = get().layout
+      if (!layout) return
+
+      const projectData = JSON.stringify(layout, null, 2)
+      const blob = new Blob([projectData], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${layout.name.replace(/\s+/g, '-')}-layout.json`
+      a.click()
+      
+      URL.revokeObjectURL(url)
+    },
+
+    loadFromFile: async (file: File) => {
+      try {
+        const text = await file.text()
+        const layout: Layout = JSON.parse(text)
+        
+        // Validar estrutura básica
+        if (layout && layout.id && layout.pages && Array.isArray(layout.pages)) {
+          // Atualizar timestamp
+          layout.updatedAt = new Date().toISOString()
+          
+          get().setLayout(layout)
+          get().pushHistory('Projeto carregado do arquivo')
+        } else {
+          throw new Error('Estrutura do arquivo inválida')
+        }
+      } catch (error) {
+        console.error('Erro ao carregar arquivo:', error)
+        throw new Error('Arquivo inválido ou corrompido')
+      }
+    },
+  }))
 )

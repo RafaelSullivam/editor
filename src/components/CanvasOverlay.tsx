@@ -151,8 +151,8 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           locked: false,
           visible: true,
           zIndex: 0,
-          fill: '#3B82F6',
-          stroke: '#1E40AF',
+          fill: '#ffffff',
+          stroke: '#000000',
           strokeWidth: 1,
         }
         break
@@ -363,7 +363,7 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
       transform: `rotate(${transform.rotation || 0}deg) scale(${transform.scaleX || 1}, ${transform.scaleY || 1})`,
       transformOrigin: 'center',
       cursor: tool === 'select' ? 'move' : 'default',
-      border: isSelected ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.1)',
+      border: isSelected ? '2px solid #3b82f6' : 'none',
       backgroundColor: element.type === 'rectangle' ? (element as any).fill || 'transparent' : 'transparent',
       pointerEvents: element.locked ? 'none' : 'auto',
     }
@@ -434,6 +434,7 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
             key={element.id}
             style={{
               ...style,
+              backgroundColor: rectElement.fill || '#ffffff',
               borderColor: rectElement.stroke || '#000000',
               borderWidth: `${(rectElement.strokeWidth || 1) * scale}px`,
               borderStyle: 'solid',

@@ -5,6 +5,7 @@ import PDFViewer from './components/PDFViewer'
 import CanvasOverlay from './components/CanvasOverlay'
 import Toolbar from './components/Toolbar'
 import PropertyPanel from './components/PropertyPanel'
+import PDFPreview from './components/PDFPreview'
 import { PAGE_FORMATS } from './types'
 
 function App() {
@@ -12,14 +13,18 @@ function App() {
   const [showSidebar, setShowSidebar] = useState(true)
   const [showWelcome, setShowWelcome] = useState(true)
   const [showPropertyPanel, setShowPropertyPanel] = useState(true)
+  const [showPDFPreview, setShowPDFPreview] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [isGridVisible, setIsGridVisible] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const projectFileInputRef = useRef<HTMLInputElement>(null)
 
   const {
     layout,
     currentPage,
-    createNewLayout
+    createNewLayout,
+    downloadProject,
+    loadFromFile
   } = useEditorStore()
 
   // Criar layout padrão se não existir
@@ -45,6 +50,32 @@ function App() {
       createNewLayout('Novo Layout', PAGE_FORMATS.A4)
     }
     setShowWelcome(false)
+  }
+
+  const handleDownloadProject = () => {
+    downloadProject()
+  }
+
+  const handleLoadFromFile = () => {
+    projectFileInputRef.current?.click()
+  }
+
+  const handleProjectFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && file.name.endsWith('.json')) {
+      try {
+        await loadFromFile(file)
+        setShowWelcome(false)
+        console.log('Projeto carregado com sucesso!')
+      } catch (error) {
+        console.error('Erro ao carregar projeto:', error)
+        alert('Erro ao carregar o projeto. Verifique se o arquivo é válido.')
+      }
+    }
+    // Limpar input
+    if (event.target) {
+      event.target.value = ''
+    }
   }
 
   return (
@@ -156,6 +187,15 @@ function App() {
             </a>
 
             <div className="navbar-nav ms-auto d-flex flex-row">
+              <button 
+                className="btn btn-outline-success btn-sm me-2"
+                onClick={() => setShowPDFPreview(true)}
+                title="Visualizar PDF"
+              >
+                <i className="bi bi-file-earmark-pdf me-1"></i>
+                Testar PDF
+              </button>
+              
               <button className="btn btn-outline-secondary btn-sm me-2">
                 <i className="bi bi-folder me-1"></i>
                 Projetos
@@ -211,7 +251,10 @@ function App() {
         </header>
 
         {/* Toolbar */}
-        <Toolbar />
+        <Toolbar 
+          onDownload={handleDownloadProject}
+          onLoadFromFile={handleLoadFromFile}
+        />
 
         {/* Main Content Area */}
         <div className="d-flex flex-grow-1 overflow-hidden">
@@ -448,7 +491,7 @@ function App() {
         </div>
       </div>
 
-      {/* Hidden file input */}
+      {/* Hidden file input for PDF */}
       <input
         ref={fileInputRef}
         type="file"
@@ -456,6 +499,39 @@ function App() {
         onChange={handlePdfUpload}
         className="d-none"
       />
+      
+      {/* Hidden file input for project JSON */}
+      <input
+        ref={projectFileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleProjectFileUpload}
+        className="d-none"
+      />
+
+      {/* PDF Preview Modal */}
+      {showPDFPreview && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-xl modal-fullscreen-lg-down">
+            <div className="modal-content h-100">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-file-earmark-pdf me-2"></i>
+                  Teste do Relatório PDF
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowPDFPreview(false)}
+                ></button>
+              </div>
+              <div className="modal-body p-0" style={{ height: 'calc(100% - 120px)' }}>
+                <PDFPreview />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -80,6 +80,31 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = '' }) 
         }
       })
     }
+    // Para propriedades de cor específicas (usar as propriedades certas para cada tipo)
+    else if (property === 'backgroundColor') {
+      // Para retângulos usar 'fill', para outros usar a propriedade direta
+      const propName = selectedElement.type === 'rectangle' ? 'fill' : 'backgroundColor'
+      updateElement(selectedElement.id, {
+        ...selectedElement,
+        [propName]: value
+      } as any)
+    }
+    else if (property === 'borderColor') {
+      // Para retângulos e linhas usar 'stroke', para outros usar 'borderColor'
+      const propName = ['rectangle', 'line'].includes(selectedElement.type) ? 'stroke' : 'borderColor'
+      updateElement(selectedElement.id, {
+        ...selectedElement,
+        [propName]: value
+      } as any)
+    }
+    else if (property === 'borderWidth') {
+      // Para retângulos e linhas usar 'strokeWidth', para outros usar 'borderWidth'
+      const propName = ['rectangle', 'line'].includes(selectedElement.type) ? 'strokeWidth' : 'borderWidth'
+      updateElement(selectedElement.id, {
+        ...selectedElement,
+        [propName]: value
+      } as any)
+    }
     // Para outras propriedades do elemento
     else {
       updateElement(selectedElement.id, {
@@ -968,7 +993,7 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
         <input
           type="color"
           className="form-control form-control-color form-control-sm"
-          value={element.style?.backgroundColor || '#ffffff'}
+          value={(selectedElement as any).backgroundColor || (selectedElement as any).fill || '#ffffff'}
           onChange={(e) => handlePropertyChange('backgroundColor', e.target.value)}
         />
       </div>
@@ -978,7 +1003,7 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
         <input
           type="color"
           className="form-control form-control-color form-control-sm"
-          value={element.style?.borderColor || '#000000'}
+          value={(selectedElement as any).borderColor || (selectedElement as any).stroke || '#000000'}
           onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
         />
       </div>
@@ -1030,7 +1055,7 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
         <input
           type="color"
           className="form-control form-control-color form-control-sm"
-          value={element.style?.borderColor || '#000000'}
+          value={(selectedElement as any).borderColor || (selectedElement as any).stroke || '#000000'}
           onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
         />
       </div>
@@ -1040,7 +1065,7 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
         <input
           type="number"
           className="form-control form-control-sm"
-          value={element.style?.borderWidth || 1}
+          value={(selectedElement as any).borderWidth || (selectedElement as any).strokeWidth || 1}
           onChange={(e) => handlePropertyChange('borderWidth', parseInt(e.target.value))}
           min="1"
           max="10"
