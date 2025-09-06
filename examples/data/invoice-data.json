@@ -1,0 +1,50 @@
+{
+  "empresa": {
+    "nome": "TechSolutions Ltda",
+    "endereco": "Rua das Flores, 123",
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "cep": "01234-567",
+    "cnpj": "12.345.678/0001-90",
+    "email": "contato@techsolutions.com.br",
+    "telefone": "(11) 98765-4321",
+    "chavePix": "12345678000190@techsolutions.com.br"
+  },
+  "cliente": {
+    "nome": "João Silva & Associados",
+    "documento": "CNPJ: 98.765.432/0001-12",
+    "endereco": "Av. Paulista, 1000 - Sala 501",
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "cep": "01310-100"
+  },
+  "fatura": {
+    "numero": "FAT-2024-001",
+    "data": "05/09/2024",
+    "vencimento": "20/09/2024",
+    "subtotal": "R$ 2.850,00",
+    "desconto": "R$ 285,00",
+    "total": "R$ 2.565,00",
+    "pixCode": "00020126580014BR.GOV.BCB.PIX013612345678000190@techsolutions.com.br5204000053039865802BR5925TechSolutions Ltda6009SAO PAULO62070503***6304A1B2"
+  },
+  "itens": [
+    {
+      "descricao": "Desenvolvimento de Sistema Web",
+      "quantidade": "1",
+      "valorUnitario": "R$ 1.500,00",
+      "total": "R$ 1.500,00"
+    },
+    {
+      "descricao": "Consultoria em TI - 8 horas",
+      "quantidade": "8",
+      "valorUnitario": "R$ 120,00",
+      "total": "R$ 960,00"
+    },
+    {
+      "descricao": "Manutenção Sistema - Mensal",
+      "quantidade": "1",
+      "valorUnitario": "R$ 390,00",
+      "total": "R$ 390,00"
+    }
+  ]
+}

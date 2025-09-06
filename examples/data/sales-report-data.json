@@ -1,0 +1,76 @@
+{
+  "empresa": {
+    "nome": "VendaMax Distribuidora",
+    "logo": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMTAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjMzB4MmY2Ii8+Cjx0ZXh0IHg9IjUwIiB5PSIzMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Vk1EPC90ZXh0Pgo8L3N2Zz4K"
+  },
+  "relatorio": {
+    "periodo": "Setembro 2024",
+    "dataGeracao": "05/09/2024 às 14:30"
+  },
+  "resumo": {
+    "totalVendas": "1.247",
+    "receita": "R$ 186.420,50",
+    "meta": "R$ 200.000,00",
+    "percentualMeta": "93,2%"
+  },
+  "produtos": [
+    {
+      "nome": "Notebook Dell Inspiron",
+      "quantidade": "156",
+      "receita": "R$ 78.240,00"
+    },
+    {
+      "nome": "Mouse Logitech MX Master",
+      "quantidade": "289",
+      "receita": "R$ 23.120,00"
+    },
+    {
+      "nome": "Teclado Mecânico RGB",
+      "quantidade": "198",
+      "receita": "R$ 19.800,00"
+    },
+    {
+      "nome": "Monitor 24\" Full HD",
+      "quantidade": "87",
+      "receita": "R$ 17.400,00"
+    },
+    {
+      "nome": "Fone Bluetooth Premium",
+      "quantidade": "245",
+      "receita": "R$ 14.700,00"
+    }
+  ],
+  "regioes": [
+    {
+      "nome": "Sudeste",
+      "vendas": "526",
+      "crescimento": "+12,5%"
+    },
+    {
+      "nome": "Sul",
+      "vendas": "312",
+      "crescimento": "+8,7%"
+    },
+    {
+      "nome": "Nordeste",
+      "vendas": "248",
+      "crescimento": "+15,2%"
+    },
+    {
+      "nome": "Centro-Oeste",
+      "vendas": "98",
+      "crescimento": "+4,1%"
+    },
+    {
+      "nome": "Norte",
+      "vendas": "63",
+      "crescimento": "+18,9%"
+    }
+  ],
+  "grafico": {
+    "dadosMensais": "Jan: R$ 145k, Fev: R$ 158k, Mar: R$ 172k, Abr: R$ 163k, Mai: R$ 179k, Jun: R$ 185k, Jul: R$ 168k, Ago: R$ 177k, Set: R$ 186k"
+  },
+  "observacoes": {
+    "texto": "• Setembro apresentou crescimento de 5,1% em relação a agosto, superando as expectativas.\n• A região Norte mostrou o maior crescimento percentual (18,9%), indicando expansão bem-sucedida do mercado.\n• Notebooks continuam sendo nosso produto líder em receita, representando 42% do faturamento total.\n• Recomenda-se manter estoque elevado de periféricos premium para outubro, período de alta demanda.\n• Meta de outubro ajustada para R$ 195.000 com base na tendência atual."
+  }
+}

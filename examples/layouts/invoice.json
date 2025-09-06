@@ -1,0 +1,381 @@
+{
+  "id": "layout-invoice-001",
+  "name": "Fatura Comercial",
+  "version": "1.0.0",
+  "createdAt": "2025-09-05T00:00:00.000Z",
+  "updatedAt": "2025-09-05T00:00:00.000Z",
+  "config": {
+    "snapToGrid": true,
+    "snapToElements": true,
+    "gridSize": 5,
+    "showGrid": true,
+    "showRulers": true,
+    "snapThreshold": 5,
+    "defaultUnit": "mm",
+    "zoom": 1
+  },
+  "pages": [
+    {
+      "id": "page-001",
+      "name": "Página Principal",
+      "config": {
+        "width": 210,
+        "height": 297,
+        "unit": "mm",
+        "orientation": "portrait",
+        "margins": {
+          "top": 20,
+          "right": 20,
+          "bottom": 20,
+          "left": 20
+        },
+        "dpi": 300
+      },
+      "elements": [
+        {
+          "id": "header-title",
+          "type": "text",
+          "name": "Título da Fatura",
+          "bounds": {
+            "x": 20,
+            "y": 20,
+            "width": 170,
+            "height": 15
+          },
+          "content": "FATURA COMERCIAL",
+          "fontSize": 24,
+          "fontFamily": "Arial",
+          "fontWeight": "bold",
+          "fontStyle": "normal",
+          "color": "#2563eb",
+          "textAlign": "center",
+          "verticalAlign": "top",
+          "lineHeight": 1.2,
+          "letterSpacing": 1,
+          "textDecoration": "none",
+          "wordWrap": false,
+          "locked": false,
+          "visible": true,
+          "zIndex": 1
+        },
+        {
+          "id": "company-info",
+          "type": "text",
+          "name": "Informações da Empresa",
+          "bounds": {
+            "x": 20,
+            "y": 45,
+            "width": 80,
+            "height": 40
+          },
+          "content": "{{empresa.nome}}\n{{empresa.endereco}}\n{{empresa.cidade}}, {{empresa.estado}} {{empresa.cep}}\nCNPJ: {{empresa.cnpj}}",
+          "fontSize": 10,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "#374151",
+          "textAlign": "left",
+          "verticalAlign": "top",
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "textDecoration": "none",
+          "wordWrap": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 2
+        },
+        {
+          "id": "invoice-number",
+          "type": "text",
+          "name": "Número da Fatura",
+          "bounds": {
+            "x": 110,
+            "y": 45,
+            "width": 80,
+            "height": 20
+          },
+          "content": "Fatura Nº: {{fatura.numero}}\nData: {{fatura.data}}\nVencimento: {{fatura.vencimento}}",
+          "fontSize": 10,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "#374151",
+          "textAlign": "right",
+          "verticalAlign": "top",
+          "lineHeight": 1.4,
+          "letterSpacing": 0,
+          "textDecoration": "none",
+          "wordWrap": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 3
+        },
+        {
+          "id": "customer-info",
+          "type": "rectangle",
+          "name": "Área do Cliente",
+          "bounds": {
+            "x": 20,
+            "y": 95,
+            "width": 170,
+            "height": 30
+          },
+          "fill": "#f3f4f6",
+          "stroke": "#d1d5db",
+          "strokeWidth": 1,
+          "locked": false,
+          "visible": true,
+          "zIndex": 4
+        },
+        {
+          "id": "customer-details",
+          "type": "text",
+          "name": "Dados do Cliente",
+          "bounds": {
+            "x": 25,
+            "y": 100,
+            "width": 160,
+            "height": 20
+          },
+          "content": "FATURAR PARA:\n{{cliente.nome}} - {{cliente.documento}}\n{{cliente.endereco}}\n{{cliente.cidade}}, {{cliente.estado}} {{cliente.cep}}",
+          "fontSize": 9,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "#374151",
+          "textAlign": "left",
+          "verticalAlign": "top",
+          "lineHeight": 1.3,
+          "letterSpacing": 0,
+          "textDecoration": "none",
+          "wordWrap": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 5
+        },
+        {
+          "id": "items-table",
+          "type": "table",
+          "name": "Tabela de Itens",
+          "bounds": {
+            "x": 20,
+            "y": 140,
+            "width": 170,
+            "height": 80
+          },
+          "columns": [
+            {
+              "id": "col-item",
+              "title": "Item",
+              "field": "itens.descricao",
+              "width": 60,
+              "textAlign": "left",
+              "fontSize": 9,
+              "fontWeight": "normal",
+              "color": "#374151"
+            },
+            {
+              "id": "col-qtd",
+              "title": "Qtd",
+              "field": "itens.quantidade",
+              "width": 20,
+              "textAlign": "center",
+              "fontSize": 9,
+              "fontWeight": "normal",
+              "color": "#374151"
+            },
+            {
+              "id": "col-valor",
+              "title": "Valor Unit.",
+              "field": "itens.valorUnitario",
+              "width": 30,
+              "textAlign": "right",
+              "fontSize": 9,
+              "fontWeight": "normal",
+              "color": "#374151"
+            },
+            {
+              "id": "col-total",
+              "title": "Total",
+              "field": "itens.total",
+              "width": 30,
+              "textAlign": "right",
+              "fontSize": 9,
+              "fontWeight": "normal",
+              "color": "#374151"
+            }
+          ],
+          "headerStyle": {
+            "backgroundColor": "#e5e7eb",
+            "fontSize": 9,
+            "fontWeight": "bold",
+            "color": "#374151",
+            "height": 20
+          },
+          "rowStyle": {
+            "backgroundColor": "transparent",
+            "alternateBackgroundColor": "#f9fafb",
+            "fontSize": 9,
+            "color": "#374151",
+            "height": 15
+          },
+          "showHeader": true,
+          "showBorders": true,
+          "borderColor": "#d1d5db",
+          "borderWidth": 1,
+          "pageBreak": true,
+          "repeatHeader": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 6
+        },
+        {
+          "id": "totals-area",
+          "type": "rectangle",
+          "name": "Área de Totais",
+          "bounds": {
+            "x": 130,
+            "y": 230,
+            "width": 60,
+            "height": 30
+          },
+          "fill": "#f9fafb",
+          "stroke": "#d1d5db",
+          "strokeWidth": 1,
+          "locked": false,
+          "visible": true,
+          "zIndex": 7
+        },
+        {
+          "id": "totals-text",
+          "type": "text",
+          "name": "Totais",
+          "bounds": {
+            "x": 135,
+            "y": 235,
+            "width": 50,
+            "height": 20
+          },
+          "content": "Subtotal: {{fatura.subtotal}}\nDesconto: {{fatura.desconto}}\nTotal: {{fatura.total}}",
+          "fontSize": 9,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "#374151",
+          "textAlign": "right",
+          "verticalAlign": "top",
+          "lineHeight": 1.3,
+          "letterSpacing": 0,
+          "textDecoration": "none",
+          "wordWrap": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 8
+        },
+        {
+          "id": "payment-qr",
+          "type": "qrcode",
+          "name": "QR Code Pagamento",
+          "bounds": {
+            "x": 20,
+            "y": 230,
+            "width": 25,
+            "height": 25
+          },
+          "content": "{{fatura.pixCode}}",
+          "errorCorrectionLevel": "M",
+          "margin": 2,
+          "color": "#000000",
+          "backgroundColor": "#ffffff",
+          "locked": false,
+          "visible": true,
+          "zIndex": 9
+        },
+        {
+          "id": "payment-info",
+          "type": "text",
+          "name": "Informações de Pagamento",
+          "bounds": {
+            "x": 50,
+            "y": 230,
+            "width": 75,
+            "height": 25
+          },
+          "content": "Pagamento via PIX\nChave: {{empresa.chavePix}}\nEscaneie o QR Code ao lado",
+          "fontSize": 8,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "color": "#6b7280",
+          "textAlign": "left",
+          "verticalAlign": "top",
+          "lineHeight": 1.3,
+          "letterSpacing": 0,
+          "textDecoration": "none",
+          "wordWrap": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 10
+        },
+        {
+          "id": "footer-line",
+          "type": "line",
+          "name": "Linha do Rodapé",
+          "bounds": {
+            "x": 20,
+            "y": 270,
+            "width": 170,
+            "height": 1
+          },
+          "startPoint": {
+            "x": 20,
+            "y": 270
+          },
+          "endPoint": {
+            "x": 190,
+            "y": 270
+          },
+          "stroke": "#d1d5db",
+          "strokeWidth": 1,
+          "strokeStyle": "solid",
+          "locked": false,
+          "visible": true,
+          "zIndex": 11
+        },
+        {
+          "id": "footer-text",
+          "type": "text",
+          "name": "Rodapé",
+          "bounds": {
+            "x": 20,
+            "y": 275,
+            "width": 170,
+            "height": 10
+          },
+          "content": "Obrigado pela preferência! | Email: {{empresa.email}} | Telefone: {{empresa.telefone}}",
+          "fontSize": 7,
+          "fontFamily": "Arial",
+          "fontWeight": "normal",
+          "fontStyle": "italic",
+          "color": "#9ca3af",
+          "textAlign": "center",
+          "verticalAlign": "top",
+          "lineHeight": 1.2,
+          "letterSpacing": 0,
+          "textDecoration": "none",
+          "wordWrap": true,
+          "locked": false,
+          "visible": true,
+          "zIndex": 12
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "template": "invoice",
+    "category": "commercial",
+    "tags": ["fatura", "comercial", "brasil"],
+    "description": "Template de fatura comercial com QR Code PIX e tabela de itens",
+    "author": "Editor de Layouts"
+  }
+}
