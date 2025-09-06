@@ -486,8 +486,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({ element, onClose, onSa
                               key={column.id}
                               style={{
                                 width: column.width,
-                                borderColor: tableConfig.globalStyle?.borderColor,
-                                borderWidth: tableConfig.globalStyle?.borderWidth
+                                border: `${tableConfig.globalStyle?.borderWidth || 1}px solid ${tableConfig.globalStyle?.borderColor || '#cccccc'}`
                               }}
                               className={selectedCell?.row === 0 && selectedCell?.col === colIndex ? 'table-active' : ''}
                               onClick={() => setSelectedCell({ row: 0, col: colIndex })}
@@ -514,8 +513,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({ element, onClose, onSa
                               <td
                                 key={`${row.id}-${colIndex}`}
                                 style={{
-                                  borderColor: tableConfig.globalStyle?.borderColor,
-                                  borderWidth: tableConfig.globalStyle?.borderWidth
+                                  border: `${tableConfig.globalStyle?.borderWidth || 1}px solid ${tableConfig.globalStyle?.borderColor || '#cccccc'}`
                                 }}
                                 className={selectedCell?.row === actualRowIndex && selectedCell?.col === colIndex ? 'table-active' : ''}
                                 onClick={() => setSelectedCell({ row: actualRowIndex, col: colIndex })}

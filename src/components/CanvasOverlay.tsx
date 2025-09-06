@@ -402,7 +402,58 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
       height: convertUnits(element.bounds.height, 'mm', 'px', 96) * scale,
     }
 
-    const style: React.CSSProperties = {
+    // Apply advanced styles (shadows, gradients, filters)
+    const applyAdvancedStyles = (baseStyle: React.CSSProperties): React.CSSProperties => {
+      const advancedStyle = (element as any).advancedStyle
+      
+      // Debug log
+      if (advancedStyle && (advancedStyle.shadows || advancedStyle.gradient || advancedStyle.filters)) {
+        console.log('Applying advanced styles to element:', element.id, advancedStyle)
+      }
+      
+      if (!advancedStyle) return baseStyle
+
+      const enhancedStyle = { ...baseStyle }
+
+      // Apply shadows
+      if (advancedStyle.shadows && advancedStyle.shadows.length > 0) {
+        enhancedStyle.boxShadow = advancedStyle.shadows.map((shadow: any) => {
+          const inset = shadow.inset ? 'inset ' : ''
+          return `${inset}${shadow.offsetX * scale}px ${shadow.offsetY * scale}px ${shadow.blur * scale}px ${shadow.spread * scale}px ${shadow.color}`
+        }).join(', ')
+      }
+
+      // Apply gradient
+      if (advancedStyle.gradient) {
+        const gradient = advancedStyle.gradient
+        if (gradient.type === 'linear') {
+          const stops = gradient.stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ')
+          enhancedStyle.background = `linear-gradient(${gradient.angle}deg, ${stops})`
+        } else if (gradient.type === 'radial') {
+          const stops = gradient.stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ')
+          enhancedStyle.background = `radial-gradient(circle, ${stops})`
+        }
+      }
+
+      // Apply filters
+      if (advancedStyle.filters) {
+        const filters = []
+        const f = advancedStyle.filters
+        if (f.blur > 0) filters.push(`blur(${f.blur}px)`)
+        if (f.brightness !== 100) filters.push(`brightness(${f.brightness}%)`)
+        if (f.contrast !== 100) filters.push(`contrast(${f.contrast}%)`)
+        if (f.saturate !== 100) filters.push(`saturate(${f.saturate}%)`)
+        if (f.hueRotate !== 0) filters.push(`hue-rotate(${f.hueRotate}deg)`)
+        
+        if (filters.length > 0) {
+          enhancedStyle.filter = filters.join(' ')
+        }
+      }
+
+      return enhancedStyle
+    }
+
+    const baseStyle: React.CSSProperties = {
       position: 'absolute',
       left: bounds.x,
       top: bounds.y,
@@ -416,6 +467,8 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
       backgroundColor: element.type === 'rectangle' ? (element as any).fill || 'transparent' : 'transparent',
       pointerEvents: element.locked ? 'none' : 'auto',
     }
+
+    const style = applyAdvancedStyles(baseStyle)
 
     switch (element.type) {
       case 'text':
@@ -478,15 +531,14 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
 
       case 'rectangle':
         const rectElement = element as any
+        console.log('Rendering rectangle element:', rectElement.id, 'advancedStyle:', rectElement.advancedStyle)
         return (
           <div
             key={element.id}
             style={{
               ...style,
               backgroundColor: rectElement.fill || '#ffffff',
-              borderColor: rectElement.stroke || '#000000',
-              borderWidth: `${(rectElement.strokeWidth || 1) * scale}px`,
-              borderStyle: 'solid',
+              border: `${(rectElement.strokeWidth || 1) * scale}px solid ${rectElement.stroke || '#000000'}`,
               borderRadius: `${(rectElement.border?.radius || 0) * scale}px`,
             }}
             onMouseDown={(e) => {

@@ -344,6 +344,7 @@ export const useEditorStore = create<EditorStore>()(
     },
 
     updateElement: (elementId, updates) => {
+      console.log('Store: updateElement called', elementId, updates)
       const { layout, currentPageId } = get()
       if (!layout || !currentPageId) return
       
@@ -365,6 +366,8 @@ export const useEditorStore = create<EditorStore>()(
         pages: updatedPages,
         updatedAt: new Date().toISOString(),
       }
+      
+      console.log('Store: Updated layout', updatedLayout)
       
       set({ 
         layout: updatedLayout as Layout,

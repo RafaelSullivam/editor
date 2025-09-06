@@ -55,10 +55,12 @@ export const AdvancedDesignPanel: React.FC<AdvancedDesignPanelProps> = ({
   }
 
   const handleShadowChange = (shadows: Shadow[]) => {
+    console.log('AdvancedDesignPanel: Updating shadows for element', selectedElement?.id, shadows)
     const newStyle: AdvancedStyle = {
       ...currentStyle,
       shadows
     }
+    console.log('AdvancedDesignPanel: New style object', newStyle)
     updateElement(selectedElement.id, { advancedStyle: newStyle })
   }
 

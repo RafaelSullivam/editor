@@ -663,9 +663,11 @@ export const generate${currentPage.name?.replace(/\s+/g, '') || 'Layout'}PDF = (
     
     if (element.type === 'rectangle') {
       if (element.fill) code += `    backgroundColor: '${element.fill}',\n`
-      if (element.stroke) code += `    borderColor: '${element.stroke}',\n`
-      if (element.strokeWidth) code += `    borderWidth: '${element.strokeWidth}px',\n`
-      code += `    borderStyle: 'solid',\n`
+      if (element.stroke || element.strokeWidth) {
+        const borderColor = element.stroke || '#000000'
+        const borderWidth = element.strokeWidth || 1
+        code += `    border: '${borderWidth}px solid ${borderColor}',\n`
+      }
     }
     
     code += `    position: 'absolute',\n`
